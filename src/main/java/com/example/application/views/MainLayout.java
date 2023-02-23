@@ -7,10 +7,13 @@ import com.example.application.views.about.AboutView;
 import com.example.application.views.helloworld.HelloWorldView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -32,10 +35,29 @@ public class MainLayout extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
+        // view title in header
         viewTitle = new H2();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        addToNavbar(true, toggle, viewTitle);
+        // sign in and register buttons
+        Button btn_signIn = new Button("Sign In");
+        btn_signIn.addClickListener(e ->
+                btn_signIn.getUI().ifPresent(ui ->
+                        ui.navigate("signIn")));
+
+        Button btn_register = new Button("Register");
+        btn_register.addClickListener(e ->
+                btn_register.getUI().ifPresent(ui ->
+                        ui.navigate("register")));
+
+        HorizontalLayout header = new HorizontalLayout(toggle, viewTitle, btn_signIn, btn_register);
+        header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        // make the buttons appear on the far right
+        header.expand(viewTitle);
+        header.setWidth("100%");
+        header.addClassNames("py-0", "px-m");
+
+        addToNavbar(header);
     }
 
     private void addDrawerContent() {
