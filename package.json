@@ -9,6 +9,7 @@
     "@polymer/iron-resizable-behavior": "3.0.1",
     "@polymer/polymer": "3.5.1",
     "@vaadin-component-factory/vcf-nav": "1.0.6",
+    "@vaadin-component-factory/vcf-toggle-button": "1.0.3",
     "@vaadin/accordion": "23.3.7",
     "@vaadin/app-layout": "23.3.7",
     "@vaadin/avatar": "23.3.7",
@@ -270,6 +271,7 @@
       "@polymer/iron-resizable-behavior": "3.0.1",
       "@polymer/polymer": "3.5.1",
       "@vaadin-component-factory/vcf-nav": "1.0.6",
+      "@vaadin-component-factory/vcf-toggle-button": "1.0.3",
       "@vaadin/accordion": "23.3.7",
       "@vaadin/app-layout": "23.3.7",
       "@vaadin/avatar": "23.3.7",
@@ -401,6 +403,6 @@
       "workbox-core": "6.5.4",
       "workbox-precaching": "6.5.4"
     },
-    "hash": "df41522358a8d2ef3db4812f589fbac978ddc916bc55a1520dd459ea06ecf7fc"
+    "hash": "9b5e7196d8ffabfd6a311b8a788d79fd230c51716bdc4ab0cb147b865fde313a"
   }
 }

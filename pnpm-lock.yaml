@@ -10,6 +10,7 @@ specifiers:
   '@rollup/plugin-replace': 3.1.0
   '@rollup/pluginutils': 4.1.0
   '@vaadin-component-factory/vcf-nav': 1.0.6
+  '@vaadin-component-factory/vcf-toggle-button': 1.0.3
   '@vaadin/accordion': 23.3.7
   '@vaadin/app-layout': 23.3.7
   '@vaadin/avatar': 23.3.7
@@ -145,6 +146,7 @@ dependencies:
   '@polymer/iron-resizable-behavior': 3.0.1
   '@polymer/polymer': 3.5.1
   '@vaadin-component-factory/vcf-nav': 1.0.6
+  '@vaadin-component-factory/vcf-toggle-button': 1.0.3
   '@vaadin/accordion': 23.3.7
   '@vaadin/app-layout': 23.3.7
   '@vaadin/avatar': 23.3.7
@@ -1734,6 +1736,16 @@ packages:
       lit: 2.6.1
     dev: false
 
+  /@vaadin-component-factory/vcf-toggle-button/1.0.3:
+    resolution: {integrity: sha512-fl3QY4odMLv9Uq5TeWXke25XVPcnFP4m2BjOmlAfbP2gIp8I1xXX/Fru3+8NZlZz/pcY+s/v6fuShkkhHoDkmQ==}
+    dependencies:
+      '@polymer/polymer': 3.5.1
+      '@vaadin/vaadin-checkbox': 23.3.7
+      '@vaadin/vaadin-element-mixin': 2.4.2
+      '@vaadin/vaadin-lumo-styles': 23.3.7
+      '@vaadin/vaadin-themable-mixin': 23.3.7
+    dev: false
+
   /@vaadin/accordion/23.3.7:
     resolution: {integrity: sha512-j/9sC/z911zTwE4xXG2J6Gpv2X301vb3bY9WY6qnPaKsyHQmTEl5O9U7mMkJQHjkW+MdZ9JzQDDa+iOEMo+veg==}
     dependencies:
@@ -2852,6 +2864,14 @@ packages:
     resolution: {integrity: sha512-PJuFi23R+GRFZnD0jKalZ9gP5JPzFv2UPr09bNV9YyF08GTYPhWR9pi2CR/wRbeBolMTwH/+502Ng4qMTbZ8Dg==}
     dependencies:
       '@vaadin/dialog': 23.3.7
+    dev: false
+
+  /@vaadin/vaadin-element-mixin/2.4.2:
+    resolution: {integrity: sha512-VSDVK0XUsFe/RohpwSzQwgqb2Pwpok6sDNhIDS4CARr3HPhq2voMzT/FowFbkEy0J1hFtN/ZfC7tkv3kdEKKIQ==}
+    dependencies:
+      '@polymer/polymer': 3.5.1
+      '@vaadin/vaadin-development-mode-detector': 2.0.5
+      '@vaadin/vaadin-usage-statistics': 2.1.2
     dev: false
 
   /@vaadin/vaadin-form-layout/23.3.7:
