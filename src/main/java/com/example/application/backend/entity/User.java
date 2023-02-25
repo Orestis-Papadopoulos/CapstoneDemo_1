@@ -1,17 +1,24 @@
 package com.example.application.backend.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.UUID;
 
 @Entity
 public class User {
     @Id
-    @Column(name = "serial_number", nullable = false)
-    private String serial_number;
+    @Column(name = "id", nullable = false)
+    private UUID uuid =  UUID.randomUUID();
 
     private String first_name;
     private String last_name;
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
 
     public String getFirst_name() {
         return first_name;
@@ -27,13 +34,5 @@ public class User {
 
     public void setLast_name(String last_name) {
         this.last_name = last_name;
-    }
-
-    public String getSerial_number() {
-        return serial_number;
-    }
-
-    public void setSerial_number(String serial_number) {
-        this.serial_number = serial_number;
     }
 }
