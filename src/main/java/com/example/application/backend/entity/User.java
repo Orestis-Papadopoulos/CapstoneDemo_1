@@ -7,17 +7,26 @@ import java.util.UUID;
 public class User {
     @Id
     @Column(name = "id", nullable = false)
-    private UUID uuid =  UUID.randomUUID();
+    private String id;
 
     private String first_name;
     private String last_name;
+    private String proximity_card_id;
 
-    public UUID getUuid() {
-        return uuid;
+    public String getProximity_card_id() {
+        return proximity_card_id;
     }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+    public void setProximity_card_id(String proximity_card_id) {
+        this.proximity_card_id = proximity_card_id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFirst_name() {

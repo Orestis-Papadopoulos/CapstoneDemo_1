@@ -1,6 +1,7 @@
 package com.example.application.views.register;
 
 import com.example.application.backend.entity.User;
+import com.example.application.backend.service.UserService;
 import com.example.application.views.MainLayout;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -16,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.InputStreamFactory;
@@ -25,6 +27,7 @@ import javax.imageio.ImageIO;
 import javax.xml.transform.stream.StreamSource;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.UUID;
 
 @PageTitle("Register")
 @Route(value = "register", layout = MainLayout.class)
@@ -41,12 +44,17 @@ public class RegisterView extends VerticalLayout {
     // for data binding
     Binder<User> binder = new Binder<>(User.class);
     User user = new User();
-    String qrcode_data = user.getUuid() + "";
     String charset = "UTF-8";
     ByteArrayOutputStream imageBuffer = null;
 
 
     public RegisterView() throws IOException, WriterException {
+        // set user id manually
+        user.setId(UUID.randomUUID() + "");
+
+        // the QR code is a representation of the user's id
+        String qrcode_data =  user.getId() + "";
+
         // automatic binding
         binder.bindInstanceFields(this);
 
@@ -110,12 +118,12 @@ public class RegisterView extends VerticalLayout {
         btn_layout.setVisible(false);
         scanLayout.setVisible(true);
 
-//        try {
-//            // takes data from the form fields and matches them to the User entity fields
-//            binder.writeBean(user);
-//            if (binder.validate().isOk()) UserService.saveUserToDatabase(user);
-//        } catch (ValidationException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            // takes data from the form fields and matches them to the User entity fields
+            binder.writeBean(user);
+            if (binder.validate().isOk()) UserService.saveUserToDatabase(user);
+        } catch (ValidationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
