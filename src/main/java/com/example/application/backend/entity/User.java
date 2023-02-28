@@ -6,12 +6,21 @@ import java.util.UUID;
 @Entity
 public class User {
     @Id
-    @Column(name = "id", nullable = false)
-    private String id;
+    @Column(name = "uuid", nullable = false)
+    private String uuid;
 
     private String first_name;
     private String last_name;
     private String proximity_card_id;
+    private String session_id;
+
+    public String getSession_id() {
+        return session_id;
+    }
+
+    public void setSession_id(String session_id) {
+        this.session_id = session_id;
+    }
 
     public String getProximity_card_id() {
         return proximity_card_id;
@@ -21,12 +30,12 @@ public class User {
         this.proximity_card_id = proximity_card_id;
     }
 
-    public String getId() {
-        return id;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getFirst_name() {

@@ -50,10 +50,10 @@ public class RegisterView extends VerticalLayout {
 
     public RegisterView() throws IOException, WriterException {
         // set user id manually
-        user.setId(UUID.randomUUID() + "");
+        user.setUuid(UUID.randomUUID() + "");
 
         // the QR code is a representation of the user's id
-        String qrcode_data =  user.getId() + "";
+        String qrcode_data =  user.getUuid() + "";
 
         // automatic binding
         binder.bindInstanceFields(this);
