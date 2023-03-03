@@ -4,11 +4,7 @@ import com.example.application.backend.entity.User;
 import com.example.application.backend.service.UserService;
 import com.example.application.views.MainLayout;
 import com.example.application.views.qrcode.QRCode;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -21,12 +17,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.InputStreamFactory;
-import com.vaadin.flow.server.StreamResource;
 
-import javax.imageio.ImageIO;
-import javax.xml.transform.stream.StreamSource;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.UUID;
 
@@ -50,10 +41,10 @@ public class RegisterView extends VerticalLayout {
 
     public RegisterView() throws IOException, WriterException {
         // set user id manually
-        user.setUuid(UUID.randomUUID() + "");
+        user.setUser_uuid(UUID.randomUUID() + "");
 
         // the QR code is a representation of the user's id
-        String qrcode_data =  user.getUuid() + "";
+        String qrcode_data =  user.getUser_uuid() + "";
 
         // automatic data binding
         binder.bindInstanceFields(this);

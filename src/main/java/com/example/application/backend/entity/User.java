@@ -1,25 +1,24 @@
 package com.example.application.backend.entity;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @Entity
 public class User {
     @Id
-    @Column(name = "uuid", nullable = false)
-    private String uuid;
+    @Column(name = "user_uuid", nullable = false)
+    private String user_uuid;
 
     private String first_name;
     private String last_name;
     private String proximity_card_id;
-    private String session_id;
+    private String sign_in_session_uuid;
 
-    public String getSession_id() {
-        return session_id;
+    public String getSign_in_session_uuid() {
+        return sign_in_session_uuid;
     }
 
-    public void setSession_id(String session_id) {
-        this.session_id = session_id;
+    public void setSign_in_session_uuid(String sign_in_session_uuid) {
+        this.sign_in_session_uuid = sign_in_session_uuid;
     }
 
     public String getProximity_card_id() {
@@ -30,12 +29,12 @@ public class User {
         this.proximity_card_id = proximity_card_id;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getUser_uuid() {
+        return user_uuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setUser_uuid(String user_uuid) {
+        this.user_uuid = user_uuid;
     }
 
     public String getFirst_name() {

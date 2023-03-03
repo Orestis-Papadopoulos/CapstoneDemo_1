@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -36,7 +37,9 @@ public class SignInView extends VerticalLayout {
         btn_cancel.addThemeVariants(ButtonVariant.LUMO_ERROR);
         tipsLayout.add(tip1, tip2, btn_cancel);
 
-        qr_code = new Image(QRCode.stringToStreamResource(UUID.randomUUID() + ""), "QR code resource missing: failed to load dynamically");
+        String data = UUID.randomUUID() + "";
+        Notification.show(data);
+        qr_code = new Image(QRCode.stringToStreamResource(data), "QR code resource missing: failed to load dynamically");
         qrLayout.add(qr_code);
 
         scanLayout.add(tipsLayout, qrLayout);

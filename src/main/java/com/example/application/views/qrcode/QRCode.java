@@ -22,7 +22,7 @@ public class QRCode {
     // once you type InputStreamFactory in, it prompts for the methods to implement
     // goto vaadin book p. 91 and adjust the implementation of getStream() to create dynamic image
     public static StreamResource stringToStreamResource(String qrcode_data) {
-        StreamResource resource = new StreamResource("", new InputStreamFactory() {
+        return new StreamResource("", new InputStreamFactory() {
             @Override
             public InputStream createInputStream() {
                 BitMatrix matrix = null;
@@ -46,6 +46,5 @@ public class QRCode {
                 return InputStreamFactory.super.requiresLock();
             }
         });
-        return resource;
     }
 }
