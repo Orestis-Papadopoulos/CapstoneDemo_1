@@ -3,6 +3,7 @@ package com.example.application.views.register;
 import com.example.application.backend.entity.User;
 import com.example.application.backend.service.UserService;
 import com.example.application.views.MainLayout;
+import com.example.application.views.qrcode.QRCode;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -47,7 +48,6 @@ public class RegisterView extends VerticalLayout {
     String charset = "UTF-8";
     ByteArrayOutputStream imageBuffer = null;
 
-
     public RegisterView() throws IOException, WriterException {
         // set user id manually
         user.setUuid(UUID.randomUUID() + "");
@@ -55,7 +55,7 @@ public class RegisterView extends VerticalLayout {
         // the QR code is a representation of the user's id
         String qrcode_data =  user.getUuid() + "";
 
-        // automatic binding
+        // automatic data binding
         binder.bindInstanceFields(this);
 
         // form
@@ -72,40 +72,12 @@ public class RegisterView extends VerticalLayout {
         });
 
         Span tip1 = new Span("The QR code to the right is your password. Open your mobile app to scan it.");
-        Span tip2 = new Span("After you've scanned it, scan your card over your phone to complete the registration.");
+        Span tip2 = new Span("Make sure you've scanned your card over your phone to complete the registration.");
         Button btn_cancel = new Button("Cancel");
         btn_cancel.addThemeVariants(ButtonVariant.LUMO_ERROR);
         tipsLayout.add(tip1, tip2, btn_cancel);
 
-        // for "Dynamic Content" from: https://vaadin.com/docs/latest/advanced/dynamic-content#using-streamresource
-        // found the constructor here: https://github.com/vaadin/flow/blob/main/flow-server/src/main/java/com/vaadin/flow/server/StreamResource.java
-        // once you type InputStreamFactory in, it prompts for the methods to implement
-        // goto vaadin book p. 91 and adjust the implementation of getStream() to create dynamic image
-        StreamResource resource = new StreamResource("", new InputStreamFactory() {
-            @Override
-            public InputStream createInputStream() {
-                BitMatrix matrix = null;
-                try {
-                    matrix = new MultiFormatWriter().encode(new String(qrcode_data.getBytes(charset), charset), BarcodeFormat.QR_CODE, 300, 300);
-                } catch (WriterException | UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-                BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
-                imageBuffer = new ByteArrayOutputStream();
-                try {
-                    ImageIO.write(image, "png", imageBuffer);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                return new ByteArrayInputStream(imageBuffer.toByteArray());
-            }
-
-            @Override
-            public boolean requiresLock() {
-                return InputStreamFactory.super.requiresLock();
-            }
-        });
-        qr_code = new Image(resource, "QR code resource missing: failed to load dynamically");
+        qr_code = new Image(QRCode.stringToStreamResource(qrcode_data), "QR code resource missing: failed to load dynamically");
         qrLayout.add(qr_code);
 
         scanLayout.add(tipsLayout, qrLayout);
