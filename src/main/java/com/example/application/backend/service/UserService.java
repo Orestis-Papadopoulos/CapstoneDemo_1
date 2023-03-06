@@ -15,4 +15,8 @@ public class UserService {
     public static void saveUserToDatabase(User user) {
         repo.save(user);
     }
+
+    public static User getUserBySignInSessionUuid(String sign_in_session_uuid) {
+        return repo.search(sign_in_session_uuid);
+    }
 }
