@@ -13,6 +13,11 @@ public class User {
     private String proximity_card_id;
     private String sign_in_session_uuid;
 
+    @Override
+    public String toString() {
+        return "First name: " + this.first_name;
+    }
+
     public String getSign_in_session_uuid() {
         return sign_in_session_uuid;
     }

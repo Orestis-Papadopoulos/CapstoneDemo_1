@@ -29,6 +29,7 @@ public class SignInView extends VerticalLayout {
     Image qr_code;
     String sign_in_session_uuid = UUID.randomUUID() + "";
     User user;
+    boolean sign_in_session_timed_out = false;
 
     public SignInView() {
 
@@ -36,7 +37,6 @@ public class SignInView extends VerticalLayout {
         Span tip2 = new Span("Make sure you've scanned your card over your phone to complete the sign in process.");
         Button btn_cancel = new Button("Cancel");
         btn_cancel.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        btn_cancel.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         tipsLayout.add(tip1, tip2, btn_cancel);
 
         qr_code = new Image(QRCode.stringToStreamResource(sign_in_session_uuid), "QR code resource missing: failed to load dynamically");
@@ -53,21 +53,24 @@ public class SignInView extends VerticalLayout {
             public void run() {
                 System.out.println("I am the timerTask and I have executed.");
                 user = getUserBySignInSessionUuid(sign_in_session_uuid); // method defined in UserService
-                // authenticate(user.getUuid(), user.get);
+                if (user != null) {
+                    System.out.println("A user tried to sign in");
 
-                // if (user != null) signUserIn(); // method defined in AuthorizationService ?
+                    // authenticate(user.getUuid(), user.get);
+
+                    // if (user != null) signUserIn(); // method defined in AuthorizationService ?
+
+                    timer.cancel();
+                }
 
                 // this statement must be placed at the end, otherwise even after timer.cancel() code within run() will execute
-                if (++iterations > 5) {
-                    System.out.println("Sign in session timed out.");
-                    System.out.println("A USER JUST SIGNED IN");
-                    System.out.println("First name: " + user.getFirst_name() + "\n" + "Last name: " + user.getLast_name());
+                if (++iterations > 10) {
+                    System.out.println("Sign in session timed out");
+                    sign_in_session_timed_out = true;
                     timer.cancel();
                 }
             }
         };
         timer.scheduleAtFixedRate(timerTask, 0, 1000); // period is in milliseconds
-
-        System.out.println("after timer");
     }
 }

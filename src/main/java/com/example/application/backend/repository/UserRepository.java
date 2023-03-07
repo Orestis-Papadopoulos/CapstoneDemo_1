@@ -13,9 +13,9 @@ import static org.apache.commons.io.FilenameUtils.concat;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 
-    // I am not sure though how scalable this is; if there are many users, how long will it take to find the one with the session id ?
-    @Query("SELECT u FROM User u WHERE u.sign_in_session_uuid = concat('%', :searchTerm, '%')")
+    // see Vaadin docs: Implementing Filtering in the Repository
+    // see query syntax: Jakarta Persistence Query Language
+
+    @Query(value = "SELECT u FROM User u WHERE u.sign_in_session_uuid = :searchTerm")
     User search(@Param("searchTerm") String searchTerm);
-
-
 }
