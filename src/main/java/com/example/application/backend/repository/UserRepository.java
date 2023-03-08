@@ -16,6 +16,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     // see Vaadin docs: Implementing Filtering in the Repository
     // see query syntax: Jakarta Persistence Query Language
 
+    // shouldn't the searchTerm be escaped for security reasons; if so, how?
     @Query(value = "SELECT u FROM User u WHERE u.sign_in_session_uuid = :searchTerm")
     User search(@Param("searchTerm") String searchTerm);
 }

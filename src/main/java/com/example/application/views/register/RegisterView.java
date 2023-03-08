@@ -17,12 +17,16 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import java.io.*;
 import java.util.UUID;
 
+import static com.example.application.backend.service.UserService.saveUserToDatabase;
+
 @PageTitle("Register")
 @Route(value = "register", layout = MainLayout.class)
+@AnonymousAllowed
 public class RegisterView extends VerticalLayout {
     FormLayout formLayout = new FormLayout();
     TextField first_name = new TextField("First name");
@@ -36,10 +40,8 @@ public class RegisterView extends VerticalLayout {
     // for data binding
     Binder<User> binder = new Binder<>(User.class);
     User user = new User();
-    String charset = "UTF-8";
-    ByteArrayOutputStream imageBuffer = null;
 
-    public RegisterView() throws IOException, WriterException {
+    public RegisterView() {
         // set user id manually
         user.setUser_uuid(UUID.randomUUID() + "");
 
@@ -84,7 +86,7 @@ public class RegisterView extends VerticalLayout {
         try {
             // takes data from the form fields and matches them to the User entity fields
             binder.writeBean(user);
-            if (binder.validate().isOk()) UserService.saveUserToDatabase(user);
+            if (binder.validate().isOk()) saveUserToDatabase(user);
         } catch (ValidationException e) {
             throw new RuntimeException(e);
         }

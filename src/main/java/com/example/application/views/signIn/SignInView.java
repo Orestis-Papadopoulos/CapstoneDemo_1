@@ -7,11 +7,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,8 +21,10 @@ import static com.example.application.backend.service.UserService.getUserBySignI
 
 @PageTitle("Sign In")
 @Route(value = "signIn", layout = MainLayout.class)
+@AnonymousAllowed
 public class SignInView extends VerticalLayout {
 
+    private static final String LOGIN_SUCCESS_URL = "/";
     VerticalLayout tipsLayout = new VerticalLayout();
     HorizontalLayout scanLayout = new HorizontalLayout();
     VerticalLayout qrLayout = new VerticalLayout();
@@ -56,9 +58,8 @@ public class SignInView extends VerticalLayout {
                 if (user != null) {
                     System.out.println("A user tried to sign in");
 
-                    // authenticate(user.getUuid(), user.get);
-
-                    // if (user != null) signUserIn(); // method defined in AuthorizationService ?
+                    //signInUser(user.getUser_uuid(), user.getProximity_card_id());
+                    //UI.getCurrent().getPage().setLocation(LOGIN_SUCCESS_URL);
 
                     timer.cancel();
                 }

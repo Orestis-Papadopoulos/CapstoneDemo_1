@@ -1,11 +1,10 @@
 package com.example.application.views;
 
-
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.accounts.AccountsView;
-import com.example.application.views.helloworld.HelloWorldView;
+import com.example.application.views.home.HomeView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
@@ -24,6 +23,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
  */
 public class MainLayout extends AppLayout {
 
+    // I have to get the user from the SigninView to add logout btn if they are signed-in
+
     private H2 viewTitle;
 
     public MainLayout() {
@@ -40,7 +41,13 @@ public class MainLayout extends AppLayout {
         viewTitle = new H2();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        // sign in and register buttons
+        HorizontalLayout header = new HorizontalLayout(toggle, viewTitle);
+
+
+//            Button btn_logout = new Button("Logout", click ->
+//                    logoutUser());
+//            header.add(btn_logout);
+
         Button btn_signIn = new Button("Sign In");
         btn_signIn.addClickListener(e ->
                 btn_signIn.getUI().ifPresent(ui ->
@@ -51,7 +58,9 @@ public class MainLayout extends AppLayout {
                 btn_register.getUI().ifPresent(ui ->
                         ui.navigate("register")));
 
-        HorizontalLayout header = new HorizontalLayout(toggle, viewTitle, btn_signIn, btn_register);
+        header.add(btn_signIn, btn_register);
+
+
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         // make the buttons appear on the far right
         header.expand(viewTitle);
@@ -76,7 +85,7 @@ public class MainLayout extends AppLayout {
         // For documentation, visit https://github.com/vaadin/vcf-nav#readme
         AppNav nav = new AppNav();
 
-        nav.addItem(new AppNavItem("Hello World", HelloWorldView.class, "la la-globe"));
+        nav.addItem(new AppNavItem("Home", HomeView.class, "la la-globe"));
         nav.addItem(new AppNavItem("About", AboutView.class, "la la-file"));
         nav.addItem(new AppNavItem("Accounts", AccountsView.class, "la la-file"));
 
@@ -99,6 +108,4 @@ public class MainLayout extends AppLayout {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
     }
-
-
 }
