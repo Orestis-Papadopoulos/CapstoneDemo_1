@@ -12,11 +12,13 @@ import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import static com.example.application.views.signIn.SignInView.getSignedInUser;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -43,10 +45,8 @@ public class MainLayout extends AppLayout {
 
         HorizontalLayout header = new HorizontalLayout(toggle, viewTitle);
 
-
-//            Button btn_logout = new Button("Logout", click ->
-//                    logoutUser());
-//            header.add(btn_logout);
+        Button btn_logout = new Button("Logout", click ->
+                Notification.show("Logout clicked"));
 
         Button btn_signIn = new Button("Sign In");
         btn_signIn.addClickListener(e ->
@@ -58,8 +58,11 @@ public class MainLayout extends AppLayout {
                 btn_register.getUI().ifPresent(ui ->
                         ui.navigate("register")));
 
-        header.add(btn_signIn, btn_register);
-
+        if (getSignedInUser() != null) {
+            header.add(btn_logout);
+        } else {
+            header.add(btn_signIn, btn_register);
+        }
 
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         // make the buttons appear on the far right

@@ -3,12 +3,18 @@ package com.example.application.views.signIn;
 import com.example.application.backend.entity.User;
 import com.example.application.views.MainLayout;
 import com.example.application.views.qrcode.QRCode;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -16,6 +22,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import static com.example.application.backend.service.UserService.getUserBySignInSessionUuid;
 
@@ -30,10 +37,12 @@ public class SignInView extends VerticalLayout {
     VerticalLayout qrLayout = new VerticalLayout();
     Image qr_code;
     String sign_in_session_uuid = UUID.randomUUID() + "";
-    User user;
+    public static User user;
     boolean sign_in_session_timed_out = false;
 
     public SignInView() {
+
+        Page page = UI.getCurrent().getPage();
 
         Span tip1 = new Span("To sign in, open your mobile app and scan the QR code to the right.");
         Span tip2 = new Span("Make sure you've scanned your card over your phone to complete the sign in process.");
@@ -53,13 +62,14 @@ public class SignInView extends VerticalLayout {
             int iterations = 0;
             @Override
             public void run() {
-                System.out.println("I am the timerTask and I have executed.");
+                System.out.println("I am the timerTask and I have executed " + iterations + " times.");
                 user = getUserBySignInSessionUuid(sign_in_session_uuid); // method defined in UserService
                 if (user != null) {
                     System.out.println("A user tried to sign in");
 
-                    //signInUser(user.getUser_uuid(), user.getProximity_card_id());
-                    //UI.getCurrent().getPage().setLocation(LOGIN_SUCCESS_URL);
+                    // refresh
+                    // https://stackoverflow.com/questions/60179159/vaadin-spring-boot-cannot-access-state-in-vaadinsession-or-ui-without-locking
+                    getUI().ifPresent(ui -> ui.access(page::reload));
 
                     timer.cancel();
                 }
@@ -73,5 +83,9 @@ public class SignInView extends VerticalLayout {
             }
         };
         timer.scheduleAtFixedRate(timerTask, 0, 1000); // period is in milliseconds
+    }
+
+    public static User getSignedInUser() {
+        return user;
     }
 }
