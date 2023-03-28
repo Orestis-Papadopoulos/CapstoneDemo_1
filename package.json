@@ -260,7 +260,10 @@
     "@vaadin/multi-select-combo-box": "$@vaadin/multi-select-combo-box",
     "proj4": "$proj4",
     "@vaadin/tabsheet": "$@vaadin/tabsheet",
-    "@vaadin/tooltip": "$@vaadin/tooltip"
+    "@vaadin/tooltip": "$@vaadin/tooltip",
+    "@vaadin-component-factory/vcf-toggle-button": "$@vaadin-component-factory/vcf-toggle-button",
+    "line-awesome": "$line-awesome",
+    "@vaadin-component-factory/vcf-nav": "$@vaadin-component-factory/vcf-nav"
   },
   "vaadin": {
     "dependencies": {

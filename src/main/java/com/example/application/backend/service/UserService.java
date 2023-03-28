@@ -21,4 +21,13 @@ public class UserService {
     public static User getUserBySignInSessionUuid(String sign_in_session_uuid) {
         return repo.search(sign_in_session_uuid);
     }
+
+    public static User getUserByUuid(String user_uuid) {
+        return repo.search(user_uuid);
+    }
+
+    public static void deleteUserFromDatabase(User user) {
+        // called when registration is cancelled
+        repo.delete(user);
+    }
 }

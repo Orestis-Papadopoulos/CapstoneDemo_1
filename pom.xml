@@ -75,6 +75,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-push</artifactId>
+                <version>${vaadin.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -149,6 +154,10 @@
             <groupId>com.vaadin.componentfactory</groupId>
             <artifactId>togglebutton</artifactId>
             <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-push</artifactId>
         </dependency>
     </dependencies>
 

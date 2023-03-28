@@ -1,22 +1,27 @@
 package com.example.application.views;
 
+import com.example.application.backend.entity.User;
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.accounts.AccountsView;
 import com.example.application.views.home.HomeView;
+import com.example.application.views.signIn.SignInView;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.page.History;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
 
@@ -25,9 +30,9 @@ import static com.example.application.views.signIn.SignInView.getSignedInUser;
  */
 public class MainLayout extends AppLayout {
 
-    // I have to get the user from the SigninView to add logout btn if they are signed-in
+    // I have to get the user from the SignInView to add logout btn if they are signed-in
 
-    private H2 viewTitle;
+    private static H2 viewTitle;
 
     public MainLayout() {
         setPrimarySection(Section.DRAWER);
@@ -45,21 +50,29 @@ public class MainLayout extends AppLayout {
 
         HorizontalLayout header = new HorizontalLayout(toggle, viewTitle);
 
-        Button btn_logout = new Button("Logout", click ->
-                Notification.show("Logout clicked"));
+        Span user_name = new Span();
+        User user = getSignedInUser();
 
         Button btn_signIn = new Button("Sign In");
-        btn_signIn.addClickListener(e ->
-                btn_signIn.getUI().ifPresent(ui ->
-                        ui.navigate("signIn")));
+        btn_signIn.addClickListener(e -> {
+            btn_signIn.getUI().ifPresent(ui ->
+                    ui.navigate("signIn"));
+        });
 
         Button btn_register = new Button("Register");
         btn_register.addClickListener(e ->
                 btn_register.getUI().ifPresent(ui ->
                         ui.navigate("register")));
 
-        if (getSignedInUser() != null) {
-            header.add(btn_logout);
+        Button btn_logout = new Button("Logout");
+        btn_logout.addClickListener(e -> {
+            user.setSign_in_session_uuid(null);
+            UI.getCurrent().getPage().reload();
+        });
+
+        if (user != null && user.getSign_in_session_uuid() != null) {
+            user_name.setText(user.getFirst_name() + " " + user.getLast_name());
+            header.add(user_name, btn_logout);
         } else {
             header.add(btn_signIn, btn_register);
         }
