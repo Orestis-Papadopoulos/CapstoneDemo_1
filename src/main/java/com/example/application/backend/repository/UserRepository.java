@@ -17,6 +17,11 @@ public interface UserRepository extends JpaRepository<User, String> {
     // see query syntax: Jakarta Persistence Query Language
 
     // shouldn't the searchTerm be escaped for security reasons; if so, how?
+
+
     @Query(value = "SELECT u FROM User u WHERE u.sign_in_session_uuid = :searchTerm")
-    User search(@Param("searchTerm") String searchTerm);
+    User searchBySignInSessionUuid(@Param("searchTerm") String searchTerm);
+
+    @Query(value = "SELECT u FROM User u WHERE u.user_uuid = :searchTerm")
+    User searchByUserUuid(@Param("searchTerm") String searchTerm);
 }

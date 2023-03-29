@@ -46,8 +46,17 @@ public class SignInView extends VerticalLayout {
     public static User user;
     Timer timer = new Timer();
     H2 title = new H2("Sign In");
+    Dialog dialog = new Dialog();
 
     public SignInView() {
+        // session timed out dialog
+        dialog.setHeaderTitle("Sign In Session Timed Out");
+        VerticalLayout dialogLayout = new VerticalLayout();
+        Span message = new Span("You will be redirected to Home page shortly.");
+        dialogLayout.add(message);
+        dialog.add(dialogLayout);
+        add(dialog);
+
         qr_code = new Image(QRCode.stringToStreamResource(sign_in_session_uuid), "QR code resource missing: failed to load dynamically");
         Span tip = new Span("Open your mobile app and scan me to sign in.");
         Button btn_cancel = new Button("Cancel");
@@ -62,32 +71,44 @@ public class SignInView extends VerticalLayout {
         qrCodeLayout.setWidth("25%");
         qrCodeLayout.setHorizontalComponentAlignment(Alignment.CENTER, title, qr_code, tip, btn_cancel);
         setHorizontalComponentAlignment(Alignment.CENTER, qrCodeLayout);
-        qrCodeLayout.add(title, qr_code, tip, btn_cancel);
-        add(qrCodeLayout);
+        qrCodeLayout.add(qr_code, tip, btn_cancel);
+        add(title, qrCodeLayout);
 
         Page page = UI.getCurrent().getPage();
 
         // query database for about 5 minutes
+        // for production: period = 2000; iterations values above = [147, 150] (2 sec * 150 iterations = 300 sec = 5 min)
         TimerTask timerTask = new TimerTask() {
             int iterations = 0;
             @Override
             public void run() {
 
                 System.out.println("I am the timerTask and I have been executed " + iterations + " times.");
-                user = getUserBySignInSessionUuid(sign_in_session_uuid); // method defined in UserService
 
-                if (user != null) {
-                    System.out.println("A user tried to sign in");
+                if (iterations < 6) {
+                    user = getUserBySignInSessionUuid(sign_in_session_uuid); // method defined in UserService
 
-                    // see: "Asynchronous Updates" (https://vaadin.com/docs/v14/flow/advanced/tutorial-push-access)
+                    if (user != null) {
+                        System.out.println("A user tried to sign in");
+
+                        // see: "Asynchronous Updates" (https://vaadin.com/docs/v14/flow/advanced/tutorial-push-access)
+                        getUI().ifPresent(ui -> ui.access(() -> {
+                            page.setLocation("home");
+                        }));
+                        timer.cancel();
+                    }
+                }
+
+                if (iterations == 6) {
                     getUI().ifPresent(ui -> ui.access(() -> {
-                        page.setLocation("home");
+                        qrCodeLayout.setVisible(false);
+                        title.setVisible(false);
+                        dialog.open();
                     }));
-                    timer.cancel();
                 }
 
                 // this statement must be placed at the end, otherwise even after timer.cancel() code within run() will execute
-                if (++iterations > 10) {
+                if (++iterations > 12) {
                     System.out.println("Sign in session timed out");
                     getUI().ifPresent(ui -> ui.access(() -> {
                         page.setLocation("home");

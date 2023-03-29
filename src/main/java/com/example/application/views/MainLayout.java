@@ -6,23 +6,20 @@ import com.example.application.components.appnav.AppNavItem;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.accounts.AccountsView;
 import com.example.application.views.home.HomeView;
-import com.example.application.views.signIn.SignInView;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.page.History;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+
+import java.util.UUID;
+
+import static com.example.application.backend.service.UserService.saveUserToDatabase;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
 
 /**
@@ -60,13 +57,18 @@ public class MainLayout extends AppLayout {
         });
 
         Button btn_register = new Button("Register");
-        btn_register.addClickListener(e ->
-                btn_register.getUI().ifPresent(ui ->
-                        ui.navigate("register")));
+        btn_register.addClickListener(e -> {
+            btn_register.getUI().ifPresent(ui ->
+                    ui.navigate("register"));
+        });
 
         Button btn_logout = new Button("Logout");
         btn_logout.addClickListener(e -> {
+
+            // set the sign_in_session_uuid null; only signed-in users should have non-null sign in session uuid
             user.setSign_in_session_uuid(null);
+            saveUserToDatabase(user); // you must save to update the sign in session uuid in database
+
             UI.getCurrent().getPage().reload();
         });
 

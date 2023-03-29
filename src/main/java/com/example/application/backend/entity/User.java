@@ -13,6 +13,16 @@ public class User {
     private String proximity_card_id;
     private String sign_in_session_uuid;
 
+    // constructor to create User object based on a uuid
+    public User(String user_uuid) {
+        this.user_uuid = user_uuid;
+    }
+
+    // needs a default constructor
+    public User() {
+
+    }
+
     @Override
     public String toString() {
         return "First name: " + this.first_name;
