@@ -8,23 +8,28 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import org.apache.commons.compress.utils.IOUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.example.application.backend.service.UserService.*;
 
@@ -36,9 +41,10 @@ public class RegisterView extends VerticalLayout {
     H2 title = new H2("Register");
     TextField first_name = new TextField("First name");
     TextField last_name = new TextField("Last name");
+    byte[] photo;
     //
-    VerticalLayout formAndButtonsLayout = new VerticalLayout();
-    FormLayout formLayout = new FormLayout();
+    VerticalLayout verticalLayout = new VerticalLayout();
+    FormLayout txtfieldsLayout = new FormLayout();
     HorizontalLayout buttonsLayout;
     //
     VerticalLayout qrCodeLayout = new VerticalLayout();
@@ -50,6 +56,9 @@ public class RegisterView extends VerticalLayout {
     String user_uuid = UUID.randomUUID() + "";
     User user = new User(user_uuid);
     Dialog dialog = new Dialog();
+    // photo
+    MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+    Upload upload = new Upload(buffer);
 
     public RegisterView() {
         // session timed out dialog
@@ -63,22 +72,52 @@ public class RegisterView extends VerticalLayout {
         // automatic data binding
         binder.bindInstanceFields(this);
 
+        // for photo
+        upload.setMaxFiles(1);
+        upload.setAcceptedFileTypes("image/jpeg", ".jpeg", ".jpg",
+                                    "image/png", ".png");
+        upload.setDropLabel(new Span("Drop photo here"));
+        Button btn_upload = new Button("Upload Photo");
+        upload.setUploadButton(btn_upload);
+
+        // if the upload button is modified, then it is not disabled when 1 file (max allowed) is uploaded
+        // do this to disable/enable accordingly
+        upload.getElement()
+                .addEventListener("max-files-reached-changed", event -> {
+                    boolean maxFilesReached = event.getEventData()
+                            .getBoolean("event.detail.value");
+                    btn_upload.setEnabled(!maxFilesReached);
+                }).addEventData("event.detail.value");
+
+        upload.addSucceededListener(event -> {
+            String fileName = event.getFileName();
+            InputStream inputStream = buffer.getInputStream(fileName);
+            try {
+                photo = IOUtils.toByteArray(inputStream);
+                user.setPhoto(photo);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         // form
-        formLayout.setColspan(first_name, 2);
-        formLayout.setColspan(last_name, 2);
-        formLayout.add(first_name, last_name);
+        txtfieldsLayout.setColspan(first_name, 2);
+        txtfieldsLayout.setColspan(last_name, 2);
+        txtfieldsLayout.add(first_name, last_name);
 
         Button btn_ok = new Button("OK");
         Button btn_cancel_1 = new Button("Cancel");
         btn_cancel_1.addThemeVariants(ButtonVariant.LUMO_ERROR);
         buttonsLayout = new HorizontalLayout(btn_ok, btn_cancel_1);
-        formAndButtonsLayout.add(formLayout, buttonsLayout);
+        Span size_tip = new Span("You can upload one profile photo up to 10MB large.");
+        Span type_tip = new Span("Accepted file types: jpg, jpeg, png");
+        verticalLayout.add(txtfieldsLayout, size_tip, type_tip, upload, buttonsLayout);
         // modify the width of the outer layout
-        formAndButtonsLayout.setWidth("25%");
+        verticalLayout.setWidth("25%");
 
         // align layout in the middle of the page
-        setHorizontalComponentAlignment(Alignment.CENTER, title, formAndButtonsLayout);
-        add(title, formAndButtonsLayout);
+        setHorizontalComponentAlignment(Alignment.CENTER, title, verticalLayout);
+        add(title, verticalLayout);
 
         btn_ok.addClickListener(click_event -> {
             createUser();
@@ -113,7 +152,7 @@ public class RegisterView extends VerticalLayout {
     }
 
     private void createUser() {
-        formAndButtonsLayout.setVisible(false);
+        verticalLayout.setVisible(false);
         qrCodeLayout.setVisible(true);
         try {
             // takes data from the form fields and matches them to the User entity fields

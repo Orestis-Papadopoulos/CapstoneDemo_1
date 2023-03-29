@@ -12,6 +12,9 @@ public class User {
     private String last_name;
     private String proximity_card_id;
     private String sign_in_session_uuid;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] photo;
 
     // constructor to create User object based on a uuid
     public User(String user_uuid) {
@@ -26,6 +29,14 @@ public class User {
     @Override
     public String toString() {
         return "First name: " + this.first_name;
+    }
+
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
     }
 
     public String getSign_in_session_uuid() {

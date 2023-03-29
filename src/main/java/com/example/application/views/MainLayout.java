@@ -7,17 +7,23 @@ import com.example.application.views.about.AboutView;
 import com.example.application.views.accounts.AccountsView;
 import com.example.application.views.home.HomeView;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import java.util.UUID;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import static com.example.application.backend.service.UserService.saveUserToDatabase;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
@@ -28,16 +34,16 @@ import static com.example.application.views.signIn.SignInView.getSignedInUser;
 public class MainLayout extends AppLayout {
 
     // I have to get the user from the SignInView to add logout btn if they are signed-in
-
     private static H2 viewTitle;
+    User user;
 
-    public MainLayout() {
+    public MainLayout() throws IOException {
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
     }
 
-    private void addHeaderContent() {
+    private void addHeaderContent() throws IOException {
         DrawerToggle toggle = new DrawerToggle();
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
@@ -48,7 +54,7 @@ public class MainLayout extends AppLayout {
         HorizontalLayout header = new HorizontalLayout(toggle, viewTitle);
 
         Span user_name = new Span();
-        User user = getSignedInUser();
+        user = getSignedInUser();
 
         Button btn_signIn = new Button("Sign In");
         btn_signIn.addClickListener(e -> {
@@ -73,8 +79,21 @@ public class MainLayout extends AppLayout {
         });
 
         if (user != null && user.getSign_in_session_uuid() != null) {
+
+            Avatar avatar = new Avatar();
+            byte[] uploaded_photo = user.getPhoto();
+
+            if (uploaded_photo != null) {
+                StreamResource streamResource = new StreamResource("", () -> new ByteArrayInputStream(uploaded_photo));
+                avatar.setImageResource(streamResource);
+            } else {
+                String initial_1 = Character.toString(user.getFirst_name().charAt(0));
+                String initial_2 = Character.toString(user.getLast_name().charAt(0));
+                avatar.setAbbreviation((initial_1 + initial_2).toUpperCase());
+            }
+
             user_name.setText(user.getFirst_name() + " " + user.getLast_name());
-            header.add(user_name, btn_logout);
+            header.add(avatar, user_name, btn_logout);
         } else {
             header.add(btn_signIn, btn_register);
         }
