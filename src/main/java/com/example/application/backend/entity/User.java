@@ -1,6 +1,9 @@
 package com.example.application.backend.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Entity
 public class User {
@@ -8,10 +11,16 @@ public class User {
     @Column(name = "user_uuid", nullable = false)
     private String user_uuid;
 
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "Must contain only letters.")
+    @Size(min = 2, max = 30, message = "Must be 2 to 30 characters long.")
     private String first_name;
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "Must contain only letters.")
+    @Size(min = 2, max = 30, message = "Must be 2 to 30 characters long.")
     private String last_name;
     private String proximity_card_id;
     private String sign_in_session_uuid;
+
+    // see: https://vaadin.com/blog/saving-and-displaying-images-using-jpa
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private byte[] photo;

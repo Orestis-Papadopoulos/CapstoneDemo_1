@@ -7,21 +7,29 @@ import com.example.application.views.about.AboutView;
 import com.example.application.views.accounts.AccountsView;
 import com.example.application.views.home.HomeView;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -36,6 +44,15 @@ public class MainLayout extends AppLayout {
     // I have to get the user from the SignInView to add logout btn if they are signed-in
     private static H2 viewTitle;
     User user;
+    Dialog profileDialog = new Dialog();
+    TextField first_name = new TextField("First name");
+    TextField last_name = new TextField("Last name");
+    Image photo;
+    // photo
+    MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+    Upload upload = new Upload(buffer);
+    byte[] photo_byte_array;
+    StreamResource streamResource;
 
     public MainLayout() throws IOException {
         setPrimarySection(Section.DRAWER);
@@ -68,32 +85,35 @@ public class MainLayout extends AppLayout {
                     ui.navigate("register"));
         });
 
-        Button btn_logout = new Button("Logout");
-        btn_logout.addClickListener(e -> {
-
-            // set the sign_in_session_uuid null; only signed-in users should have non-null sign in session uuid
-            user.setSign_in_session_uuid(null);
-            saveUserToDatabase(user); // you must save to update the sign in session uuid in database
-
-            UI.getCurrent().getPage().reload();
-        });
-
         if (user != null && user.getSign_in_session_uuid() != null) {
 
             Avatar avatar = new Avatar();
-            byte[] uploaded_photo = user.getPhoto();
+            photo_byte_array = user.getPhoto();
 
-            if (uploaded_photo != null) {
-                StreamResource streamResource = new StreamResource("", () -> new ByteArrayInputStream(uploaded_photo));
+            if (photo_byte_array != null) {
+                streamResource = new StreamResource("", () -> new ByteArrayInputStream(photo_byte_array));
+                photo = new Image(streamResource, "Profile photo");
                 avatar.setImageResource(streamResource);
             } else {
                 String initial_1 = Character.toString(user.getFirst_name().charAt(0));
                 String initial_2 = Character.toString(user.getLast_name().charAt(0));
                 avatar.setAbbreviation((initial_1 + initial_2).toUpperCase());
             }
-
             user_name.setText(user.getFirst_name() + " " + user.getLast_name());
-            header.add(avatar, user_name, btn_logout);
+
+            // "pair Avatar with Menu Bar to create a user account menu"
+            MenuBar account_menu = new MenuBar();
+            account_menu.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
+
+            MenuItem menuItem = account_menu.addItem(avatar);
+            SubMenu subMenu = menuItem.getSubMenu();
+            setUpProfileDialog();
+            subMenu.addItem("Profile", listener -> profileDialog.open());
+            //subMenu.addItem("Settings");
+            subMenu.addItem("Logout", listener -> logout());
+
+            // add the account_menu on the header, not the avatar
+            header.add(account_menu, user_name);
         } else {
             header.add(btn_signIn, btn_register);
         }
@@ -131,7 +151,6 @@ public class MainLayout extends AppLayout {
 
     private Footer createFooter() {
         Footer layout = new Footer();
-
         return layout;
     }
 
@@ -144,5 +163,35 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
+    }
+
+    public void setUpProfileDialog() {
+        profileDialog.setHeaderTitle("Profile Info");
+        VerticalLayout dialogProfileLayout = new VerticalLayout();
+        FormLayout dialogFormlayout = new FormLayout();
+
+        first_name.setPlaceholder(user.getFirst_name());
+        last_name.setPlaceholder(user.getLast_name());
+
+        dialogFormlayout.setColspan(first_name, 2);
+        dialogFormlayout.setColspan(last_name, 2);
+        photo.setHeight("250px");
+        dialogFormlayout.add(first_name, last_name);
+
+        dialogProfileLayout.add(dialogFormlayout, upload, photo);
+        profileDialog.add(dialogProfileLayout);
+
+        Button btn_save = new Button("Save");
+        Button btn_cancel = new Button("Cancel", clickEvent -> profileDialog.close());
+        btn_cancel.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        profileDialog.getFooter().add(btn_cancel, btn_save);
+    }
+
+    public void logout() {
+        // set the sign_in_session_uuid null; only signed-in users should have non-null sign in session uuid
+        user.setSign_in_session_uuid(null);
+        saveUserToDatabase(user); // you must save to update the sign in session uuid in database
+
+        UI.getCurrent().getPage().reload();
     }
 }

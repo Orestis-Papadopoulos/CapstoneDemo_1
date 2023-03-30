@@ -18,6 +18,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
@@ -39,6 +40,7 @@ import static com.example.application.backend.service.UserService.*;
 @AnonymousAllowed
 public class RegisterView extends VerticalLayout {
     H2 title = new H2("Register");
+    // the form fields must have the same names as the entity columns
     TextField first_name = new TextField("First name");
     TextField last_name = new TextField("Last name");
     byte[] photo;
@@ -51,7 +53,7 @@ public class RegisterView extends VerticalLayout {
     Image qr_code = new Image();
 
     // for data binding
-    Binder<User> binder = new Binder<>(User.class);
+    Binder<User> binder = new BeanValidationBinder<>(User.class);
     Timer timer = new Timer();
     String user_uuid = UUID.randomUUID() + "";
     User user = new User(user_uuid);
@@ -71,6 +73,7 @@ public class RegisterView extends VerticalLayout {
 
         // automatic data binding
         binder.bindInstanceFields(this);
+        //binder.setBean(user);
 
         // for photo
         upload.setMaxFiles(1);
@@ -110,7 +113,7 @@ public class RegisterView extends VerticalLayout {
         btn_cancel_1.addThemeVariants(ButtonVariant.LUMO_ERROR);
         buttonsLayout = new HorizontalLayout(btn_ok, btn_cancel_1);
         Span size_tip = new Span("You can upload one profile photo up to 10MB large.");
-        Span type_tip = new Span("Accepted file types: jpg, jpeg, png");
+        Span type_tip = new Span("Accepted file types: (.jpg), (.jpeg), (.png)");
         verticalLayout.add(txtfieldsLayout, size_tip, type_tip, upload, buttonsLayout);
         // modify the width of the outer layout
         verticalLayout.setWidth("25%");
@@ -120,8 +123,10 @@ public class RegisterView extends VerticalLayout {
         add(title, verticalLayout);
 
         btn_ok.addClickListener(click_event -> {
-            createUser();
-            waitForQRScan();
+            if (binder.validate().isOk()) {
+                createUser();
+                waitForQRScan();
+            }
         });
 
         btn_cancel_1.addClickListener(click_event -> {
@@ -157,7 +162,7 @@ public class RegisterView extends VerticalLayout {
         try {
             // takes data from the form fields and matches them to the User entity fields
             binder.writeBean(user);
-            if (binder.validate().isOk()) saveUserToDatabase(user);
+            saveUserToDatabase(user);
         } catch (ValidationException e) {
             throw new RuntimeException(e);
         }
