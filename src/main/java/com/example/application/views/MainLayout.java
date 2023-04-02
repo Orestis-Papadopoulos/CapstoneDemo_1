@@ -135,7 +135,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        H1 appName = new H1("My App 4");
+        H1 appName = new H1("Qard");
         appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
         Header header = new Header(appName);
 
@@ -149,9 +149,9 @@ public class MainLayout extends AppLayout {
         // For documentation, visit https://github.com/vaadin/vcf-nav#readme
         AppNav nav = new AppNav();
 
-        nav.addItem(new AppNavItem("Home", HomeView.class, "la la-globe"));
-        nav.addItem(new AppNavItem("About", AboutView.class, "la la-file"));
-        nav.addItem(new AppNavItem("Accounts", AccountsView.class, "la la-file"));
+        nav.addItem(new AppNavItem("Home", HomeView.class, new Icon(VaadinIcon.HOME)));
+        nav.addItem(new AppNavItem("About", AboutView.class, new Icon(VaadinIcon.INFO_CIRCLE_O)));
+        nav.addItem(new AppNavItem("Accounts", AccountsView.class, new Icon(VaadinIcon.GRID_BEVEL)));
 
         return nav;
     }
@@ -178,14 +178,14 @@ public class MainLayout extends AppLayout {
 
         profileDialog.setHeaderTitle("Profile Info");
         VerticalLayout dialogProfileLayout = new VerticalLayout();
-        FormLayout dialogFormlayout = new FormLayout();
+        FormLayout profileFormlayout = new FormLayout();
 
         first_name.setValue(user.getFirst_name());
         last_name.setValue(user.getLast_name());
 
-        dialogFormlayout.setColspan(first_name, 2);
-        dialogFormlayout.setColspan(last_name, 2);
-        dialogFormlayout.add(first_name, last_name);
+        profileFormlayout.setColspan(first_name, 2);
+        profileFormlayout.setColspan(last_name, 2);
+        profileFormlayout.add(first_name, last_name);
 
         upload.setDropLabel(new Span("Drop photo here"));
         upload.addSucceededListener(event -> {
@@ -211,7 +211,7 @@ public class MainLayout extends AppLayout {
                     btn_upload.setEnabled(!maxFilesReached);
                 }).addEventData("event.detail.value");
 
-        dialogProfileLayout.add(dialogFormlayout, upload);
+        dialogProfileLayout.add(profileFormlayout, upload);
         if (photo != null) {
             MenuBar photo_menu = new MenuBar();
             MenuItem edit_photo = photo_menu.addItem("Edit photo");
@@ -255,6 +255,7 @@ public class MainLayout extends AppLayout {
         // set the sign_in_session_uuid null; only signed-in users should have non-null sign in session uuid
         user.setSign_in_session_uuid(null);
         saveUserToDatabase(user); // you must save to update the sign in session uuid in database
+        //user = new User(); // do I need this? on logout the sign in id is set to null, but the user is still available
         UI.getCurrent().getPage().reload();
     }
 }
