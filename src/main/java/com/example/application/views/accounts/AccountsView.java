@@ -9,7 +9,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -31,13 +30,15 @@ import com.vaadin.flow.router.Route;
 
 import javax.annotation.security.PermitAll;
 
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
 import static com.example.application.backend.service.AccountService.*;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 
 @PageTitle("Accounts")
 @Route(value = "accounts", layout = MainLayout.class)
@@ -88,7 +89,7 @@ public class AccountsView extends VerticalLayout {
         grid.addComponentColumn(selectedAccount -> {
             MenuBar menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
-            menuBar.addItem("", event -> loginToAccount())
+            menuBar.addItem("", event -> loginToAccount(selectedAccount))
                     .addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
             menuBar.addItem("", event -> {
                         setForm(selectedAccount);
@@ -197,7 +198,13 @@ public class AccountsView extends VerticalLayout {
         }
     }
 
-    private static void loginToAccount() {
+    private static void loginToAccount(Account selectedAccount) {
+//        WebDriverManager.firefoxdriver().setup();
+//        var driver = new FirefoxDriver();
+//        driver.get(selectedAccount.getLogin_page_url());
+        System.setProperty("webdriver.gecko.driver", "F:\\Courses\\Spring 2023\\ITC4918 Software Development Capstone\\Spring Boot Tutorial\\CapstoneDemo_1\\geckodriver.exe");
+        WebDriver driver = new FirefoxDriver();
+        driver.get("https://www.google.com");
     }
 
     private void editAccount() {
