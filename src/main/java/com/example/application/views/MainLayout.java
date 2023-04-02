@@ -17,6 +17,8 @@ import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -26,12 +28,17 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static com.example.application.backend.service.UserService.saveUserToDatabase;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
@@ -47,12 +54,12 @@ public class MainLayout extends AppLayout {
     Dialog profileDialog = new Dialog();
     TextField first_name = new TextField("First name");
     TextField last_name = new TextField("Last name");
-    Image photo;
-    // photo
+    Image image;
+    byte[] photo;
     MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
     Upload upload = new Upload(buffer);
-    byte[] photo_byte_array;
     StreamResource streamResource;
+    Binder<User> binder = new BeanValidationBinder<>(User.class);
 
     public MainLayout() throws IOException {
         setPrimarySection(Section.DRAWER);
@@ -88,11 +95,11 @@ public class MainLayout extends AppLayout {
         if (user != null && user.getSign_in_session_uuid() != null) {
 
             Avatar avatar = new Avatar();
-            photo_byte_array = user.getPhoto();
+            photo = user.getPhoto();
 
-            if (photo_byte_array != null) {
-                streamResource = new StreamResource("", () -> new ByteArrayInputStream(photo_byte_array));
-                photo = new Image(streamResource, "Profile photo");
+            if (photo != null) {
+                streamResource = new StreamResource("", () -> new ByteArrayInputStream(photo));
+                image = new Image(streamResource, "Profile photo");
                 avatar.setImageResource(streamResource);
             } else {
                 String initial_1 = Character.toString(user.getFirst_name().charAt(0));
@@ -166,22 +173,79 @@ public class MainLayout extends AppLayout {
     }
 
     public void setUpProfileDialog() {
+        // for data binding
+        binder.bindInstanceFields(this);
+
         profileDialog.setHeaderTitle("Profile Info");
         VerticalLayout dialogProfileLayout = new VerticalLayout();
         FormLayout dialogFormlayout = new FormLayout();
 
-        first_name.setPlaceholder(user.getFirst_name());
-        last_name.setPlaceholder(user.getLast_name());
+        first_name.setValue(user.getFirst_name());
+        last_name.setValue(user.getLast_name());
 
         dialogFormlayout.setColspan(first_name, 2);
         dialogFormlayout.setColspan(last_name, 2);
-        photo.setHeight("250px");
         dialogFormlayout.add(first_name, last_name);
 
-        dialogProfileLayout.add(dialogFormlayout, upload, photo);
+        upload.setDropLabel(new Span("Drop photo here"));
+        upload.addSucceededListener(event -> {
+            String fileName = event.getFileName();
+            InputStream inputStream = buffer.getInputStream(fileName);
+            try {
+                photo = IOUtils.toByteArray(inputStream);
+                user.setPhoto(photo);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        // start of Upload component
+        Button btn_upload = new Button("Upload photo");
+        upload.setUploadButton(btn_upload);
+
+        // if the upload button is modified, then it is not disabled when 1 file (max allowed) is uploaded
+        // do this to disable/enable accordingly
+        upload.getElement()
+                .addEventListener("max-files-reached-changed", event -> {
+                    boolean maxFilesReached = event.getEventData().getBoolean("event.detail.value");
+                    btn_upload.setEnabled(!maxFilesReached);
+                }).addEventData("event.detail.value");
+
+        dialogProfileLayout.add(dialogFormlayout, upload);
+        if (photo != null) {
+            MenuBar photo_menu = new MenuBar();
+            MenuItem edit_photo = photo_menu.addItem("Edit photo");
+            SubMenu submenu = edit_photo.getSubMenu();
+            submenu.addItem("Upload new", click_event ->
+                    // see last comment at: https://github.com/vaadin/flow-components/issues/1384
+                    upload.getElement().callJsFunction("shadowRoot.getElementById('addFiles').click"));
+            submenu.addItem("Delete", click_event -> {
+                user.setPhoto(null);
+            });
+
+            upload.setUploadButton(photo_menu);
+            image.setHeight("250px");
+            image.setClassName("user-photo"); // to apply css property only to this image
+            dialogProfileLayout.add(image);
+        }
+        // end of Upload component
         profileDialog.add(dialogProfileLayout);
 
         Button btn_save = new Button("Save");
+        btn_save.addClickListener(click_event -> {
+            if (binder.validate().isOk()) {
+                try {
+                    binder.writeBean(user);
+                    saveUserToDatabase(user);
+                    profileDialog.close();
+                    UI.getCurrent().getPage().reload();
+
+                } catch (ValidationException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         Button btn_cancel = new Button("Cancel", clickEvent -> profileDialog.close());
         btn_cancel.addThemeVariants(ButtonVariant.LUMO_ERROR);
         profileDialog.getFooter().add(btn_cancel, btn_save);
@@ -191,7 +255,6 @@ public class MainLayout extends AppLayout {
         // set the sign_in_session_uuid null; only signed-in users should have non-null sign in session uuid
         user.setSign_in_session_uuid(null);
         saveUserToDatabase(user); // you must save to update the sign in session uuid in database
-
         UI.getCurrent().getPage().reload();
     }
 }

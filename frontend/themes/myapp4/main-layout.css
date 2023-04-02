@@ -55,3 +55,8 @@ vaadin-scroller[slot="drawer"][overflow~="bottom"] {
 [slot="drawer"]:is(header, footer):is(:empty) {
   display: none;
 }
+
+/* use setClassName() in the image you want the property to apply (not all images must be rounded) */
+img.user-photo {
+  border-radius: 5%;
+}

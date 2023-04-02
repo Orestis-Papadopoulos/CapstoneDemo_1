@@ -155,10 +155,6 @@
             <artifactId>togglebutton</artifactId>
             <version>2.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-push</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
