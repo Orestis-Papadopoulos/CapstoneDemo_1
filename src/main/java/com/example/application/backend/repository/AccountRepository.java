@@ -14,4 +14,7 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     @Query(value = "SELECT a FROM Account a WHERE a.user_uuid = :searchTerm")
     List<Account> searchAccountsByUserUuid(@Param("searchTerm") String searchTerm);
+
+    @Query(value = "SELECT a FROM Account a WHERE a.account_id = :searchTerm")
+    Account searchAccountByAccountId(@Param("searchTerm") Long searchTerm);
 }

@@ -21,4 +21,12 @@ public class AccountService {
      public static void saveAccountToDatabase(Account account) {
          repo.save(account);
      }
+
+    public static Account getAccountByAccountId(Long id) {
+        return repo.searchAccountByAccountId(id);
+    }
+
+    public static void deleteAccountFromDatabase(Account account) {
+         repo.delete(account);
+    }
 }
