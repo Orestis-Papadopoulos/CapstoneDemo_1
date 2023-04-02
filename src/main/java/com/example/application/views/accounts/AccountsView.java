@@ -143,7 +143,7 @@ public class AccountsView extends VerticalLayout {
 
         btnLayout.add(btn_add_account, searchField, btn_show_hide);
         add(btnLayout, grid, tip, accountDialog);
-        Notification.show(Paths.get(".").toAbsolutePath().normalize().toString());
+        // removed hereeeeeee
     }
 
     // for 'show/hide' btn
