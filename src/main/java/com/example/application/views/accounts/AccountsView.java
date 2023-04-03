@@ -2,6 +2,8 @@ package com.example.application.views.accounts;
 
 import com.example.application.backend.entity.Account;
 import com.example.application.backend.entity.User;
+import com.example.application.testing.Test1;
+import com.example.application.testing.Test2;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -30,15 +32,14 @@ import com.vaadin.flow.router.Route;
 
 import javax.annotation.security.PermitAll;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
 import static com.example.application.backend.service.AccountService.*;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
-
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 
 @PageTitle("Accounts")
 @Route(value = "accounts", layout = MainLayout.class)
@@ -89,7 +90,15 @@ public class AccountsView extends VerticalLayout {
         grid.addComponentColumn(selectedAccount -> {
             MenuBar menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
-            menuBar.addItem("", event -> loginToAccount(selectedAccount))
+            menuBar.addItem("", event -> {
+                        try {
+                            loginToAccount(selectedAccount);
+                        } catch (URISyntaxException e) {
+                            throw new RuntimeException(e);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
                     .addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
             menuBar.addItem("", event -> {
                         setForm(selectedAccount);
@@ -144,7 +153,6 @@ public class AccountsView extends VerticalLayout {
 
         btnLayout.add(btn_add_account, searchField, btn_show_hide);
         add(btnLayout, grid, tip, accountDialog);
-        // removed hereeeeeee
     }
 
     // for 'show/hide' btn
@@ -198,13 +206,24 @@ public class AccountsView extends VerticalLayout {
         }
     }
 
-    private static void loginToAccount(Account selectedAccount) {
-//        WebDriverManager.firefoxdriver().setup();
+    private static void loginToAccount(Account selectedAccount) throws URISyntaxException, IOException {
+//        WebDriverManager.firefoxdriver().setup(); // manager throws error with dependency
 //        var driver = new FirefoxDriver();
 //        driver.get(selectedAccount.getLogin_page_url());
-        System.setProperty("webdriver.gecko.driver", "F:\\Courses\\Spring 2023\\ITC4918 Software Development Capstone\\Spring Boot Tutorial\\CapstoneDemo_1\\geckodriver.exe");
-        WebDriver driver = new FirefoxDriver();
-        driver.get("https://www.google.com");
+
+//        System.setProperty("webdriver.gecko.driver", "geckodriver.exe");
+//        WebDriver driver = new FirefoxDriver();
+//        driver.get("https://www.google.com");
+
+        Test1 test = new Test1(); // works but how do I get elements without driver ?
+        test.browse("https://blackboard.acg.edu/");
+
+//        System.setProperty("webdriver.chrome.driver", "C:\\Users\\Orestis\\Desktop\\chrome\\chromedriver.exe");
+//        WebDriver driver = new ChromeDriver();
+//        driver.get("https://www.google.com");
+
+//        Test2 test2 = new Test2();
+//        test2.openURLWithHTMLUnit();
     }
 
     private void editAccount() {
