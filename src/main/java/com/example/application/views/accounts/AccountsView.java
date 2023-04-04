@@ -8,12 +8,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -21,6 +23,7 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -73,9 +76,13 @@ public class AccountsView extends VerticalLayout {
     TextField btn_login_css_selector = new TextField("Login Button CSS Selector");
 
     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT);
-
     Grid<Account> grid = new Grid<>(Account.class, false);
     GridListDataView<Account> dataView;
+
+    // redirect dialog
+    Dialog redirectDialog = new Dialog();
+    VerticalLayout redirectLayout = new VerticalLayout();
+    ProgressBar progressBar = new ProgressBar();
 
     public AccountsView() {
         binder.bindInstanceFields(this);
@@ -93,25 +100,24 @@ public class AccountsView extends VerticalLayout {
             MenuBar menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
             menuBar.addItem("", event -> {
+                        redirectDialog.open(); // SHOWS AFTER LOGIN HAS COMPLETED
                         try {
                             loginToAccount(selectedAccount);
-                        } catch (URISyntaxException e) {
-                            throw new RuntimeException(e);
-                        } catch (IOException e) {
+                        } catch (URISyntaxException | IOException e) {
                             throw new RuntimeException(e);
                         }
-                    })
-                    .addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
+                    }).addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
+
             menuBar.addItem("", event -> {
                         setForm(selectedAccount);
                         editAccount();
-                    })
-                    .addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.EDIT), new Span("Edit")));
+                    }).addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.EDIT), new Span("Edit")));
+
             menuBar.addItem("", event -> {
                         account_id = selectedAccount.getAccount_id();
                         deleteAccount();
-                    })
-                    .addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.TRASH), new Span("Delete")));
+                    }).addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.TRASH), new Span("Delete")));
+
             return menuBar;
         }).setWidth("70px").setFlexGrow(0);
 
@@ -152,9 +158,14 @@ public class AccountsView extends VerticalLayout {
 
         //dataView.addFilter(person -> {});
 
+        // redirect
+        progressBar.setIndeterminate(true);
+        //redirectDialog.setHeaderTitle("Redirecting ...");
+        redirectLayout.add(new Span("Redirecting to account..."), progressBar);
+        redirectDialog.add(redirectLayout);
 
         btnLayout.add(btn_add_account, searchField, btn_show_hide);
-        add(btnLayout, grid, tip, accountDialog);
+        add(btnLayout, grid, tip, accountDialog, redirectDialog);
     }
 
     // for 'show/hide' btn
@@ -189,7 +200,10 @@ public class AccountsView extends VerticalLayout {
         accountDialog.setWidth("50%");
 
         btn_save = new Button("Save", click_event -> updateAccounts());
-        btn_cancel = new Button("Cancel", click_event -> accountDialog.close());
+        btn_cancel = new Button("Cancel", click_event -> {
+            account_id = null;
+            accountDialog.close();
+        });
         btn_cancel.addThemeVariants(ButtonVariant.LUMO_ERROR);
         accountDialog.getFooter().add(btn_cancel, btn_save);
     }
@@ -214,9 +228,6 @@ public class AccountsView extends VerticalLayout {
 
     private static void loginToAccount(Account selectedAccount) throws URISyntaxException, IOException {
 
-//        Test3 test3 = new Test3();
-//        test3.openURL();
-
         String url = selectedAccount.getLogin_page_url();
         String username = selectedAccount.getUsername();
         String password = selectedAccount.getPassword();
@@ -238,8 +249,22 @@ public class AccountsView extends VerticalLayout {
 
     private void deleteAccount() {
         account = getAccountByAccountId(account_id);
-        deleteAccountFromDatabase(account);
-        UI.getCurrent().getPage().reload();
+        // open confirm dialog
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setHeader("Confirm Account Deletion");
+        confirmDialog.setText("Are you sure you want to delete your \"" + account.getAccount_name() + "\" account?");
+        confirmDialog.setConfirmText("Yes, delete");
+
+        // delete account on confirm click
+        confirmDialog.addConfirmListener(click_event -> {
+            deleteAccountFromDatabase(account);
+            UI.getCurrent().getPage().reload();
+        });
+
+        confirmDialog.setRejectable(true);
+        confirmDialog.setRejectText("No, cancel");
+        confirmDialog.addRejectListener(click_event -> confirmDialog.close());
+        confirmDialog.open();
     }
 
     public void setForm(Account selectedAccount) {
