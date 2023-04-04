@@ -16,11 +16,16 @@ public class Account {
     @NotNull
     private String user_uuid;
     @Size(min = 1, message = "Cannot be empty.")
+    private String username;
+    @Size(min = 1, message = "Cannot be empty.")
+    private String password;
+    @Size(min = 1, message = "Cannot be empty.")
     private String login_page_url;
     @Size(min = 1, message = "Cannot be empty.")
     private String username_css_selector;
     @Size(min = 1, message = "Cannot be empty.")
     private String password_css_selector;
+    private String btn_cookies_css_selector;
     @Size(min = 1, message = "Cannot be empty.")
     private String btn_login_css_selector;
     @Pattern(regexp = "^[a-zA-Z]*$", message = "Must contain only letters.")
@@ -47,6 +52,30 @@ public class Account {
 
     public void setUser_uuid(String user_uuid) {
         this.user_uuid = user_uuid;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getBtn_cookies_css_selector() {
+        return btn_cookies_css_selector;
+    }
+
+    public void setBtn_cookies_css_selector(String btn_cookies_css_selector) {
+        this.btn_cookies_css_selector = btn_cookies_css_selector;
     }
 
     public String getLogin_page_url() {

@@ -1,10 +1,8 @@
 package com.example.application.views.accounts;
 
+import com.example.application.autoSignIn.AutoSignIn;
 import com.example.application.backend.entity.Account;
 import com.example.application.backend.entity.User;
-import com.example.application.testing.Test1;
-import com.example.application.testing.Test2;
-import com.example.application.testing.Test3;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -21,9 +19,9 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -32,7 +30,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import javax.annotation.security.PermitAll;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
@@ -67,10 +64,14 @@ public class AccountsView extends VerticalLayout {
     Binder<Account> binder = new BeanValidationBinder<>(Account.class);
     TextField account_name = new TextField("Name");
     TextField comment = new TextField("Comment");
+    TextField username = new TextField("Username");
+    PasswordField password = new PasswordField("Password");
     TextField login_page_url = new TextField("Login Page URL");
     TextField username_css_selector = new TextField("Username CSS Selector");
     TextField password_css_selector = new TextField("Password CSS Selector");
+    TextField btn_cookies_css_selector = new TextField("Cookies Button CSS Selector");
     TextField btn_login_css_selector = new TextField("Login Button CSS Selector");
+
     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT);
 
     Grid<Account> grid = new Grid<>(Account.class, false);
@@ -174,10 +175,14 @@ public class AccountsView extends VerticalLayout {
 
     public void setupDialog() {
 
+        btn_cookies_css_selector.setHelperText("If the website has no cookies, leave this empty.");
+
         VerticalLayout dialogLayout = new VerticalLayout();
         accountFormLayout.setColspan(login_page_url, 2);
-        accountFormLayout.setColspan(btn_login_css_selector, 2);
-        accountFormLayout.add(account_name, comment, login_page_url, username_css_selector, password_css_selector, btn_login_css_selector);
+        accountFormLayout.add(account_name, comment,
+                username, password, login_page_url,
+                username_css_selector, password_css_selector,
+                btn_cookies_css_selector, btn_login_css_selector);
 
         dialogLayout.add(accountFormLayout);
         accountDialog.add(dialogLayout);
@@ -208,26 +213,22 @@ public class AccountsView extends VerticalLayout {
     }
 
     private static void loginToAccount(Account selectedAccount) throws URISyntaxException, IOException {
-//        WebDriverManager.firefoxdriver().setup(); // manager throws error with dependency
-//        var driver = new FirefoxDriver();
-//        driver.get(selectedAccount.getLogin_page_url());
 
-//        System.setProperty("webdriver.gecko.driver", "geckodriver.exe");
-//        WebDriver driver = new FirefoxDriver();
-//        driver.get("https://www.google.com");
+//        Test3 test3 = new Test3();
+//        test3.openURL();
 
-//        Test1 test = new Test1(); // works but how do I get elements without driver ?
-//        test.browse("https://blackboard.acg.edu/");
+        String url = selectedAccount.getLogin_page_url();
+        String username = selectedAccount.getUsername();
+        String password = selectedAccount.getPassword();
+        String username_css_selector = selectedAccount.getUsername_css_selector();
+        String password_css_selector = selectedAccount.getPassword_css_selector();
+        String btn_cookies_css_selector = selectedAccount.getBtn_cookies_css_selector();
+        String btn_login_css_selector = selectedAccount.getBtn_login_css_selector();
 
-//        System.setProperty("webdriver.chrome.driver", "C:\\Users\\Orestis\\Desktop\\chrome\\chromedriver.exe");
-//        WebDriver driver = new ChromeDriver();
-//        driver.get("https://www.google.com");
-
-//        Test2 test2 = new Test2();
-//        test2.openURLWithHTMLUnit();
-
-        Test3 test3 = new Test3();
-        test3.openURL();
+        AutoSignIn autoSignIn = new AutoSignIn();
+        autoSignIn.openURL(url, username, password,
+                           username_css_selector, password_css_selector,
+                           btn_cookies_css_selector, btn_login_css_selector);
     }
 
     private void editAccount() {
@@ -245,9 +246,12 @@ public class AccountsView extends VerticalLayout {
         account_id = selectedAccount.getAccount_id();
         account_name.setValue(selectedAccount.getAccount_name());
         comment.setValue(selectedAccount.getComment());
+        username.setValue(selectedAccount.getUsername());
+        password.setValue(selectedAccount.getPassword());
         login_page_url.setValue(selectedAccount.getLogin_page_url());
         username_css_selector.setValue(selectedAccount.getUsername_css_selector());
         password_css_selector.setValue(selectedAccount.getPassword_css_selector());
+        btn_cookies_css_selector.setValue(selectedAccount.getBtn_cookies_css_selector());
         btn_login_css_selector.setValue(selectedAccount.getBtn_login_css_selector());
     }
 
@@ -256,12 +260,18 @@ public class AccountsView extends VerticalLayout {
         account_name.setInvalid(false);
         comment.clear();
         comment.setInvalid(false);
+        username.clear();
+        username.setInvalid(false);
+        password.clear();
+        password.setInvalid(false);
         login_page_url.clear();
         login_page_url.setInvalid(false);
         username_css_selector.clear();
         username_css_selector.setInvalid(false);
         password_css_selector.clear();
         password_css_selector.setInvalid(false);
+        btn_cookies_css_selector.clear();
+        btn_cookies_css_selector.setInvalid(false);
         btn_login_css_selector.clear();
         btn_login_css_selector.setInvalid(false);
     }
