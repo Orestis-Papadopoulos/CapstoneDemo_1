@@ -34,7 +34,6 @@ import java.util.UUID;
 
 import static com.example.application.backend.service.UserService.*;
 
-
 @PageTitle("Register")
 @Route(value = "register")
 @AnonymousAllowed

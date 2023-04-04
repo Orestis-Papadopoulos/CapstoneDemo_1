@@ -1,6 +1,5 @@
 package com.example.application.views.accounts;
 
-import com.example.application.autoSignIn.AutoSignIn;
 import com.example.application.backend.entity.Account;
 import com.example.application.backend.entity.User;
 import com.example.application.views.MainLayout;
@@ -8,21 +7,24 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -31,11 +33,18 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.annotation.security.PermitAll;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
@@ -84,14 +93,25 @@ public class AccountsView extends VerticalLayout {
     VerticalLayout redirectLayout = new VerticalLayout();
     ProgressBar progressBar = new ProgressBar();
 
+    // grid headers
+    Span header_name = new Span("NAME");
+    Span header_comment = new Span("COMMENT");
+    Span header_date_modified = new Span("DATE MODIFIED");
+
     public AccountsView() {
+        // set class name to modify only these Spans with css
+        header_name.setClassName("header");
+        header_comment.setClassName("header");
+        header_date_modified.setClassName("header");
+
         binder.bindInstanceFields(this);
 
         // create grid
-        Grid.Column<Account> nameColumn = grid.addColumn(Account::getAccount_name).setHeader("Name").setSortable(true);
-        Grid.Column<Account> commentColumn = grid.addColumn(Account::getComment).setHeader("Comment").setSortable(true);
-        Grid.Column<Account> dateModifiedColumn = grid.addColumn(Account::getDate_modified).setHeader("Date Modified").setSortable(true);
+        Grid.Column<Account> nameColumn = grid.addColumn(Account::getAccount_name).setHeader(header_name).setSortable(true);
+        Grid.Column<Account> commentColumn = grid.addColumn(Account::getComment).setHeader(header_comment).setSortable(true);
+        Grid.Column<Account> dateModifiedColumn = grid.addColumn(Account::getDate_modified).setHeader(header_date_modified).setSortable(true);
         grid.setWidth("75%");
+        grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
 
         //grid.asSingleSelect().addValueChangeListener(event -> setForm(event.getValue()));
 
@@ -100,7 +120,7 @@ public class AccountsView extends VerticalLayout {
             MenuBar menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
             menuBar.addItem("", event -> {
-                        redirectDialog.open(); // SHOWS AFTER LOGIN HAS COMPLETED
+                        //redirectDialog.open(); // OPENS AFTER THE AUTO LOGIN HAS TAKEN PLACE, AND PREVENTS NAVIGATING TO THE NEW WINDOW
                         try {
                             loginToAccount(selectedAccount);
                         } catch (URISyntaxException | IOException e) {
@@ -236,10 +256,40 @@ public class AccountsView extends VerticalLayout {
         String btn_cookies_css_selector = selectedAccount.getBtn_cookies_css_selector();
         String btn_login_css_selector = selectedAccount.getBtn_login_css_selector();
 
-        AutoSignIn autoSignIn = new AutoSignIn();
-        autoSignIn.openURL(url, username, password,
-                           username_css_selector, password_css_selector,
-                           btn_cookies_css_selector, btn_login_css_selector);
+        // driver setup
+        WebDriverManager.firefoxdriver().setup();
+        WebDriver driver = new FirefoxDriver();
+
+        // opens URL in another window, cannot open in new tab
+        driver.get(url);
+
+        // this is the window where this app is opened
+        String originalWindow = driver.getWindowHandle();
+
+        // wait until the page loads, and then click the 'OK' button for cookies
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
+        if (!btn_cookies_css_selector.equals("")) {
+            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(btn_cookies_css_selector)));
+            driver.findElement(By.cssSelector(btn_cookies_css_selector)).click();
+        } else {
+            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(username_css_selector)));
+        }
+
+        // fill username
+        driver.findElement(By.cssSelector(username_css_selector)).sendKeys(username);
+        // fill password
+        driver.findElement(By.cssSelector(password_css_selector)).sendKeys(password);
+        // click login button
+        driver.findElement(By.cssSelector(btn_login_css_selector)).click();
+
+        // navigate to the browser window opened by Selenium
+        for (String windowHandle : driver.getWindowHandles()) {
+            if(!originalWindow.contentEquals(windowHandle)) {
+                driver.switchTo().window(windowHandle);
+                break;
+            }
+        }
     }
 
     private void editAccount() {

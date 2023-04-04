@@ -60,3 +60,8 @@ vaadin-scroller[slot="drawer"][overflow~="bottom"] {
 img.user-photo {
   border-radius: 5%;
 }
+
+span.header {
+  font-weight: bold;
+  color: darkslategrey;
+}
