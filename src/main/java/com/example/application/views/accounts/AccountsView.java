@@ -4,6 +4,7 @@ import com.example.application.backend.entity.Account;
 import com.example.application.backend.entity.User;
 import com.example.application.testing.Test1;
 import com.example.application.testing.Test2;
+import com.example.application.testing.Test3;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -215,8 +216,8 @@ public class AccountsView extends VerticalLayout {
 //        WebDriver driver = new FirefoxDriver();
 //        driver.get("https://www.google.com");
 
-        Test1 test = new Test1(); // works but how do I get elements without driver ?
-        test.browse("https://blackboard.acg.edu/");
+//        Test1 test = new Test1(); // works but how do I get elements without driver ?
+//        test.browse("https://blackboard.acg.edu/");
 
 //        System.setProperty("webdriver.chrome.driver", "C:\\Users\\Orestis\\Desktop\\chrome\\chromedriver.exe");
 //        WebDriver driver = new ChromeDriver();
@@ -224,6 +225,9 @@ public class AccountsView extends VerticalLayout {
 
 //        Test2 test2 = new Test2();
 //        test2.openURLWithHTMLUnit();
+
+        Test3 test3 = new Test3();
+        test3.openURL();
     }
 
     private void editAccount() {

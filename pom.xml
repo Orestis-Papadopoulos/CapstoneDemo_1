@@ -80,6 +80,18 @@
                 <artifactId>vaadin-push</artifactId>
                 <version>${vaadin.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
+                <version>5.2.1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -155,7 +167,21 @@
             <artifactId>htmlunit</artifactId>
             <version>3.0.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>5.3.2</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
+
 
     <build>
         <defaultGoal>spring-boot:run</defaultGoal>
