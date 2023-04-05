@@ -5,8 +5,10 @@ import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.views.about.AboutView;
 import com.example.application.views.accounts.AccountsView;
+import com.example.application.views.guide.GuideView;
 import com.example.application.views.home.HomeView;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -25,6 +27,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.select.SelectVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
@@ -39,6 +43,8 @@ import org.apache.commons.compress.utils.IOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Locale;
 
 import static com.example.application.backend.service.UserService.saveUserToDatabase;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
@@ -61,13 +67,16 @@ public class MainLayout extends AppLayout {
     StreamResource streamResource;
     Binder<User> binder = new BeanValidationBinder<>(User.class);
 
+    // localization (not functional yet)
+    Select<String> langSelect = new Select<>();
+
     public MainLayout() throws IOException {
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
         addHeaderContent();
     }
 
-    private void addHeaderContent() throws IOException {
+    private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
@@ -92,6 +101,13 @@ public class MainLayout extends AppLayout {
                     ui.navigate("register"));
         });
 
+        // language (not functional yet)
+        langSelect.setItems("English", "Ελληνικά", "Español");
+        langSelect.setValue("English");
+        langSelect.addToPrefix(new Icon(VaadinIcon.GLOBE));
+        langSelect.setWidth(120, Unit.POINTS);
+        header.add(langSelect);
+
         if (user != null && user.getSign_in_session_uuid() != null) {
 
             Avatar avatar = new Avatar();
@@ -115,9 +131,9 @@ public class MainLayout extends AppLayout {
             MenuItem menuItem = account_menu.addItem(avatar);
             SubMenu subMenu = menuItem.getSubMenu();
             setUpProfileDialog();
-            subMenu.addItem("Profile", listener -> profileDialog.open());
+            subMenu.addItem(new HorizontalLayout(new Icon(VaadinIcon.USER_CARD), new Span("Profile")), listener -> profileDialog.open());
             //subMenu.addItem("Settings");
-            subMenu.addItem("Logout", listener -> logout());
+            subMenu.addItem(new HorizontalLayout(new Icon(VaadinIcon.SIGN_OUT), new Span("Logout")), listener -> logout());
 
             // add the account_menu on the header, not the avatar
             header.add(account_menu, user_name);
@@ -150,8 +166,9 @@ public class MainLayout extends AppLayout {
         AppNav nav = new AppNav();
 
         nav.addItem(new AppNavItem("Home", HomeView.class, new Icon(VaadinIcon.HOME)));
-        nav.addItem(new AppNavItem("About", AboutView.class, new Icon(VaadinIcon.INFO_CIRCLE_O)));
         nav.addItem(new AppNavItem("Accounts", AccountsView.class, new Icon(VaadinIcon.GRID_BEVEL)));
+        nav.addItem(new AppNavItem("Guide", GuideView.class, new Icon(VaadinIcon.BOOK)));
+        nav.addItem(new AppNavItem("About", AboutView.class, new Icon(VaadinIcon.INFO_CIRCLE_O)));
 
         return nav;
     }

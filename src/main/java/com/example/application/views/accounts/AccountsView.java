@@ -7,7 +7,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -21,16 +20,15 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -67,6 +65,7 @@ public class AccountsView extends VerticalLayout {
     Dialog accountDialog = new Dialog();
     Button btn_save, btn_cancel;
     List<Account> accounts;
+    GridListDataView<Account> dataView;
     Account account = new Account();
     Long account_id;
     Span tip = new Span();
@@ -86,7 +85,6 @@ public class AccountsView extends VerticalLayout {
 
     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT);
     Grid<Account> grid = new Grid<>(Account.class, false);
-    GridListDataView<Account> dataView;
 
     // redirect dialog
     Dialog redirectDialog = new Dialog();
@@ -163,20 +161,33 @@ public class AccountsView extends VerticalLayout {
         columnToggleContextMenu.addColumnToggleItem("Comment", commentColumn);
         columnToggleContextMenu.addColumnToggleItem("Date Modified", dateModifiedColumn);
 
+        // for filtering
+        searchField.setPlaceholder("Search");
+        searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
+        searchField.setValueChangeMode(ValueChangeMode.EAGER);
+
         // populate grid
         if (user != null && user.getSign_in_session_uuid() != null) {
             accounts = getAccountsByUuid(user.getUser_uuid());
             dataView = grid.setItems(accounts);
             if (accounts.isEmpty()) tip.setText("There are no accounts in the table.");
 
-        } else tip.setText("Only signed in users can add accounts.");
+            // filtering: put it inside the 'if', otherwise the grid
+            // is populated with accounts even when a user is not signed in
+            accounts = getAccountsByUuid(user.getUser_uuid());
+            dataView = grid.setItems(accounts);
+            searchField.addValueChangeListener(e -> dataView.refreshAll());
 
-        // filtering
-        searchField.setPlaceholder("Search");
-        searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
-        searchField.addValueChangeListener(e -> dataView.refreshAll());
+            dataView.addFilter(account -> {
+                String searchTerm = searchField.getValue().trim();
+                if (searchTerm.isEmpty()) return true;
+                boolean matchesName = matches(account.getAccount_name(), searchTerm);
+                boolean matchesComment = matches(account.getComment(), searchTerm);
+                boolean matchesDateModified = matches(account.getDate_modified(), searchTerm);
+                return matchesName || matchesComment || matchesDateModified;
+            });
 
-        //dataView.addFilter(person -> {});
+        } else tip.setText("Sign in to add your accounts.");
 
         // redirect
         progressBar.setIndeterminate(true);
@@ -186,6 +197,12 @@ public class AccountsView extends VerticalLayout {
 
         btnLayout.add(btn_add_account, searchField, btn_show_hide);
         add(btnLayout, grid, tip, accountDialog, redirectDialog);
+    }
+
+    // for filtering
+    private boolean matches(String value, String searchTerm) {
+        return searchTerm == null || searchTerm.isEmpty()
+                || value.toLowerCase().contains(searchTerm.toLowerCase());
     }
 
     // for 'show/hide' btn
@@ -206,7 +223,7 @@ public class AccountsView extends VerticalLayout {
 
     public void setupDialog() {
 
-        btn_cookies_css_selector.setHelperText("If the website has no cookies, leave this empty.");
+        btn_cookies_css_selector.setHelperText("Leave this empty if the website does not ask for cookies.");
 
         VerticalLayout dialogLayout = new VerticalLayout();
         accountFormLayout.setColspan(login_page_url, 2);
