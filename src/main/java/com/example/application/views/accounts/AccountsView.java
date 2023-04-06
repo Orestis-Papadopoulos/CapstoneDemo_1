@@ -23,6 +23,7 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -73,6 +75,7 @@ public class AccountsView extends VerticalLayout {
     // form
     FormLayout accountFormLayout = new FormLayout();
     Binder<Account> binder = new BeanValidationBinder<>(Account.class);
+    Select<String> selectDefaultAccount = new Select<>();
     TextField account_name = new TextField("Name");
     TextField comment = new TextField("Comment");
     TextField username = new TextField("Username");
@@ -86,23 +89,22 @@ public class AccountsView extends VerticalLayout {
     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT);
     Grid<Account> grid = new Grid<>(Account.class, false);
 
-    // redirect dialog
-    Dialog redirectDialog = new Dialog();
-    VerticalLayout redirectLayout = new VerticalLayout();
-    ProgressBar progressBar = new ProgressBar();
-
     // grid headers
     Span header_name = new Span("NAME");
     Span header_comment = new Span("COMMENT");
     Span header_date_modified = new Span("DATE MODIFIED");
+    MenuBar menuBar;
+    MenuItem item_sign_in, item_edit, item_delete;
+    List<Account> defaultAccounts = new ArrayList<>();
 
     public AccountsView() {
+        binder.bindInstanceFields(this);
+        setupDefaultAccounts();
+
         // set class name to modify only these Spans with css
         header_name.setClassName("header");
         header_comment.setClassName("header");
         header_date_modified.setClassName("header");
-
-        binder.bindInstanceFields(this);
 
         // create grid
         Grid.Column<Account> nameColumn = grid.addColumn(Account::getAccount_name).setHeader(header_name).setSortable(true);
@@ -111,36 +113,47 @@ public class AccountsView extends VerticalLayout {
         grid.setWidth("75%");
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
 
+        // replace with multi-select to delete many items at once
         //grid.asSingleSelect().addValueChangeListener(event -> setForm(event.getValue()));
 
         // account options on right-most column
         grid.addComponentColumn(selectedAccount -> {
-            MenuBar menuBar = new MenuBar();
+            menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
-            menuBar.addItem("", event -> {
-                        //redirectDialog.open(); // OPENS AFTER THE AUTO LOGIN HAS TAKEN PLACE, AND PREVENTS NAVIGATING TO THE NEW WINDOW
-                        try {
-                            loginToAccount(selectedAccount);
-                        } catch (URISyntaxException | IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
 
-            menuBar.addItem("", event -> {
-                        setForm(selectedAccount);
-                        editAccount();
-                    }).addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.EDIT), new Span("Edit")));
+            item_sign_in = menuBar.addItem("");
+            item_sign_in.setEnabled(user != null && user.getSign_in_session_uuid() != null);
+            item_sign_in.addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
+            item_sign_in.addClickListener(event -> {
+                //redirectDialog.open(); // OPENS AFTER THE AUTO LOGIN HAS TAKEN PLACE, AND PREVENTS NAVIGATING TO THE NEW WINDOW
+                try {
+                    loginToAccount(selectedAccount);
+                } catch (URISyntaxException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
-            menuBar.addItem("", event -> {
-                        account_id = selectedAccount.getAccount_id();
-                        deleteAccount();
-                    }).addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.TRASH), new Span("Delete")));
+            item_edit = menuBar.addItem("");
+            item_edit.setEnabled(user != null && user.getSign_in_session_uuid() != null);
+            item_edit.addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.EDIT), new Span("Edit")));
+            item_edit.addClickListener(event -> {
+                setForm(selectedAccount);
+                editAccount();
+            });
+
+            item_delete = menuBar.addItem("");
+            item_delete.setEnabled(user != null && user.getSign_in_session_uuid() != null);
+            item_delete.addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.TRASH), new Span("Delete")));
+            item_delete.addClickListener(event -> {
+                account_id = selectedAccount.getAccount_id();
+                deleteAccount();
+            });
 
             return menuBar;
         }).setWidth("70px").setFlexGrow(0);
 
         // dialog setup
-        setupDialog();
+        setUpAccountDialog();
 
         // 'New' btn
         btn_add_account.setText("New");
@@ -174,8 +187,6 @@ public class AccountsView extends VerticalLayout {
 
             // filtering: put it inside the 'if', otherwise the grid
             // is populated with accounts even when a user is not signed in
-            accounts = getAccountsByUuid(user.getUser_uuid());
-            dataView = grid.setItems(accounts);
             searchField.addValueChangeListener(e -> dataView.refreshAll());
 
             dataView.addFilter(account -> {
@@ -187,16 +198,62 @@ public class AccountsView extends VerticalLayout {
                 return matchesName || matchesComment || matchesDateModified;
             });
 
-        } else tip.setText("Sign in to add your accounts.");
+        } else {
+            tip.setText("This is a preview. Sign in to add your accounts.");
 
-        // redirect
-        progressBar.setIndeterminate(true);
-        //redirectDialog.setHeaderTitle("Redirecting ...");
-        redirectLayout.add(new Span("Redirecting to account..."), progressBar);
-        redirectDialog.add(redirectLayout);
+            // add default accounts to grid
+            grid.setItems(defaultAccounts);
+        }
 
         btnLayout.add(btn_add_account, searchField, btn_show_hide);
-        add(btnLayout, grid, tip, accountDialog, redirectDialog);
+
+        Button btn_test_blackboard = new Button("Test Blackboard");
+        btn_test_blackboard.addClickListener(click_event -> {
+            String url = "https://blackboard.acg.edu/";
+            String username = "s-op241394";
+            String password = "105=Bythemercury(235";
+            String username_css_selector = "#user_id";
+            String password_css_selector = "#password";
+            String btn_cookies_css_selector = "#agree_button";
+            String btn_login_css_selector = "#entry-login";
+
+            // driver setup
+            WebDriverManager.firefoxdriver().setup();
+            WebDriver driver = new FirefoxDriver();
+
+            // opens URL in another window, cannot open in new tab
+            driver.get(url);
+
+            // this is the window where this app is opened
+            String originalWindow = driver.getWindowHandle();
+
+            // wait until the page loads, and then click the 'OK' button for cookies
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
+            if (!btn_cookies_css_selector.equals("")) {
+                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(btn_cookies_css_selector)));
+                driver.findElement(By.cssSelector(btn_cookies_css_selector)).click();
+            } else {
+                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(username_css_selector)));
+            }
+
+            // fill username
+            driver.findElement(By.cssSelector(username_css_selector)).sendKeys(username);
+            // fill password
+            driver.findElement(By.cssSelector(password_css_selector)).sendKeys(password);
+            // click login button
+            driver.findElement(By.cssSelector(btn_login_css_selector)).click();
+
+            // navigate to the browser window opened by Selenium
+            for (String windowHandle : driver.getWindowHandles()) {
+                if(!originalWindow.contentEquals(windowHandle)) {
+                    driver.switchTo().window(windowHandle);
+                    break;
+                }
+            }
+        });
+
+        add(btnLayout, grid, tip, accountDialog, btn_test_blackboard);
     }
 
     // for filtering
@@ -221,13 +278,26 @@ public class AccountsView extends VerticalLayout {
         }
     }
 
-    public void setupDialog() {
+    public void setUpAccountDialog() {
+
+        selectDefaultAccount.setLabel("You can select from a list of default accounts to save some time filling the fields.");
+        selectDefaultAccount.setEmptySelectionAllowed(true);
+        selectDefaultAccount.setEmptySelectionCaption("No account selected");
+        selectDefaultAccount.setItems("Blackboard", "myACG", "Netflix");
+
+        selectDefaultAccount.addValueChangeListener(click_event -> {
+            // fill the fields
+
+            // disable everything but the select, username, password
+        });
 
         btn_cookies_css_selector.setHelperText("Leave this empty if the website does not ask for cookies.");
 
         VerticalLayout dialogLayout = new VerticalLayout();
+        accountFormLayout.setColspan(selectDefaultAccount, 2);
         accountFormLayout.setColspan(login_page_url, 2);
-        accountFormLayout.add(account_name, comment,
+        accountFormLayout.add(selectDefaultAccount,
+                account_name, comment,
                 username, password, login_page_url,
                 username_css_selector, password_css_selector,
                 btn_cookies_css_selector, btn_login_css_selector);
@@ -348,6 +418,7 @@ public class AccountsView extends VerticalLayout {
     }
 
     public void resetForm() {
+        selectDefaultAccount.clear();
         account_name.clear();
         account_name.setInvalid(false);
         comment.clear();
@@ -366,5 +437,20 @@ public class AccountsView extends VerticalLayout {
         btn_cookies_css_selector.setInvalid(false);
         btn_login_css_selector.clear();
         btn_login_css_selector.setInvalid(false);
+    }
+
+    public void setupDefaultAccounts() {
+        Account blackboard = new Account();
+        blackboard.setAccount_name("Blackboard");
+        blackboard.setComment("Deree courses");
+        blackboard.setDate_modified("6 Apr 2023");
+
+        Account myACG = new Account();
+        myACG.setAccount_name("myACG");
+        myACG.setComment("Deree account");
+        myACG.setDate_modified("6 Apr 2023");
+
+        defaultAccounts.add(blackboard);
+        defaultAccounts.add(myACG);
     }
 }
