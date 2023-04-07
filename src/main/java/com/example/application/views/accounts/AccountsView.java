@@ -22,7 +22,6 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -41,12 +40,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.annotation.security.PermitAll;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.example.application.backend.service.AccountService.*;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
@@ -62,11 +60,12 @@ public class AccountsView extends VerticalLayout {
     HorizontalLayout btnLayout = new HorizontalLayout();
     Button btn_add_account = new Button(new Icon(VaadinIcon.PLUS));
     Button btn_show_hide = new Button(new Icon(VaadinIcon.EYE));
+    Button btn_delete_selected = new Button(new Icon(VaadinIcon.TRASH));
     TextField searchField = new TextField();
     // dialog
     Dialog accountDialog = new Dialog();
     Button btn_save, btn_cancel;
-    List<Account> accounts;
+    List<Account> accounts = new ArrayList<>();
     GridListDataView<Account> dataView;
     Account account = new Account();
     Long account_id;
@@ -96,6 +95,12 @@ public class AccountsView extends VerticalLayout {
     MenuBar menuBar;
     MenuItem item_sign_in, item_edit, item_delete;
     List<Account> defaultAccounts = new ArrayList<>();
+    Account blackboard = new Account();
+    Account myACG = new Account();
+    Account netflix = new Account();
+    Account github = new Account();
+    // for multi-select deletion
+    Set<Account> selectedAccounts;
 
     public AccountsView() {
         binder.bindInstanceFields(this);
@@ -111,10 +116,21 @@ public class AccountsView extends VerticalLayout {
         Grid.Column<Account> commentColumn = grid.addColumn(Account::getComment).setHeader(header_comment).setSortable(true);
         Grid.Column<Account> dateModifiedColumn = grid.addColumn(Account::getDate_modified).setHeader(header_date_modified).setSortable(true);
         grid.setWidth("75%");
+        grid.setAllRowsVisible(true);
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
+        if (user != null && user.getSign_in_session_uuid() != null) {
+            grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        }
 
-        // replace with multi-select to delete many items at once
-        //grid.asSingleSelect().addValueChangeListener(event -> setForm(event.getValue()));
+        // implement multi-select to delete many items at once
+        btn_delete_selected.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        btn_delete_selected.setTooltipText("Delete the accounts you selected");
+        btn_delete_selected.setEnabled(false);
+        grid.addSelectionListener(selection -> {
+            selectedAccounts = selection.getAllSelectedItems();
+            btn_delete_selected.setEnabled(selectedAccounts.size() > 0);
+        });
+        btn_delete_selected.addClickListener(click_event -> deleteSelectedAccounts());
 
         // account options on right-most column
         grid.addComponentColumn(selectedAccount -> {
@@ -152,11 +168,9 @@ public class AccountsView extends VerticalLayout {
             return menuBar;
         }).setWidth("70px").setFlexGrow(0);
 
-        // dialog setup
-        setUpAccountDialog();
-
         // 'New' btn
-        btn_add_account.setText("New");
+        btn_add_account.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        btn_add_account.setTooltipText("Add a new account");
         if (user != null) btn_add_account.setEnabled(user.getSign_in_session_uuid() != null);
         else btn_add_account.setEnabled(false);
 
@@ -178,16 +192,22 @@ public class AccountsView extends VerticalLayout {
         searchField.setPlaceholder("Search");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setValueChangeMode(ValueChangeMode.EAGER);
+        searchField.setEnabled(false);
 
         // populate grid
         if (user != null && user.getSign_in_session_uuid() != null) {
+
             accounts = getAccountsByUuid(user.getUser_uuid());
             dataView = grid.setItems(accounts);
             if (accounts.isEmpty()) tip.setText("There are no accounts in the table.");
 
+            // dialog setup
+            setUpAccountDialog();
+
             // filtering: put it inside the 'if', otherwise the grid
             // is populated with accounts even when a user is not signed in
             searchField.addValueChangeListener(e -> dataView.refreshAll());
+            searchField.setEnabled(true);
 
             dataView.addFilter(account -> {
                 String searchTerm = searchField.getValue().trim();
@@ -205,55 +225,8 @@ public class AccountsView extends VerticalLayout {
             grid.setItems(defaultAccounts);
         }
 
-        btnLayout.add(btn_add_account, searchField, btn_show_hide);
-
-        Button btn_test_blackboard = new Button("Test Blackboard");
-        btn_test_blackboard.addClickListener(click_event -> {
-            String url = "https://blackboard.acg.edu/";
-            String username = "s-op241394";
-            String password = "105=Bythemercury(235";
-            String username_css_selector = "#user_id";
-            String password_css_selector = "#password";
-            String btn_cookies_css_selector = "#agree_button";
-            String btn_login_css_selector = "#entry-login";
-
-            // driver setup
-            WebDriverManager.firefoxdriver().setup();
-            WebDriver driver = new FirefoxDriver();
-
-            // opens URL in another window, cannot open in new tab
-            driver.get(url);
-
-            // this is the window where this app is opened
-            String originalWindow = driver.getWindowHandle();
-
-            // wait until the page loads, and then click the 'OK' button for cookies
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-
-            if (!btn_cookies_css_selector.equals("")) {
-                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(btn_cookies_css_selector)));
-                driver.findElement(By.cssSelector(btn_cookies_css_selector)).click();
-            } else {
-                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(username_css_selector)));
-            }
-
-            // fill username
-            driver.findElement(By.cssSelector(username_css_selector)).sendKeys(username);
-            // fill password
-            driver.findElement(By.cssSelector(password_css_selector)).sendKeys(password);
-            // click login button
-            driver.findElement(By.cssSelector(btn_login_css_selector)).click();
-
-            // navigate to the browser window opened by Selenium
-            for (String windowHandle : driver.getWindowHandles()) {
-                if(!originalWindow.contentEquals(windowHandle)) {
-                    driver.switchTo().window(windowHandle);
-                    break;
-                }
-            }
-        });
-
-        add(btnLayout, grid, tip, accountDialog, btn_test_blackboard);
+        btnLayout.add(searchField, btn_add_account, btn_delete_selected, btn_show_hide);
+        add(btnLayout, grid, tip, accountDialog);
     }
 
     // for filtering
@@ -280,15 +253,64 @@ public class AccountsView extends VerticalLayout {
 
     public void setUpAccountDialog() {
 
-        selectDefaultAccount.setLabel("You can select from a list of default accounts to save some time filling the fields.");
+        selectDefaultAccount.setLabel("You can select from a list of default accounts to save some time from filling the fields.");
         selectDefaultAccount.setEmptySelectionAllowed(true);
         selectDefaultAccount.setEmptySelectionCaption("No account selected");
-        selectDefaultAccount.setItems("Blackboard", "myACG", "Netflix");
 
-        selectDefaultAccount.addValueChangeListener(click_event -> {
+        // add to the list only the accounts the user does not have
+        // e.g., if a user has a Blackboard account, do not add Blackboard to the list
+        List<String> userAccountUrls = new ArrayList<>();
+        for (Account account : accounts) userAccountUrls.add(account.getLogin_page_url());
+
+        List<String> defaultAccountsToShow = new ArrayList<>();
+        for (Account account: defaultAccounts) {
+            if (!userAccountUrls.contains(account.getLogin_page_url())) {
+                defaultAccountsToShow.add(account.getAccount_name());
+            }
+        }
+        if (defaultAccountsToShow.isEmpty()) {
+            selectDefaultAccount.setEmptySelectionCaption("All default accounts have been added");
+            selectDefaultAccount.setEnabled(false);
+        } else selectDefaultAccount.setItems(defaultAccountsToShow);
+
+        // Select listener
+        selectDefaultAccount.addValueChangeListener(item -> {
+
+            Account defaultSelectedAccount = null;
+            for (Account account : defaultAccounts) {
+                if (account.getAccount_name().equals(item.getValue())) {
+                    defaultSelectedAccount = new Account(account);
+                    break;
+                }
+            }
+            if (defaultSelectedAccount == null) {
+                resetForm();
+                username.setPlaceholder("");
+                password.setPlaceholder("");
+                return;
+            }
+
+            // remind the user to add username and password
+            username.setPlaceholder("Add your username");
+            password.setPlaceholder("Add your password");
+
             // fill the fields
+            account_name.setValue(defaultSelectedAccount.getAccount_name());
+            comment.setValue(defaultSelectedAccount.getComment());
+            login_page_url.setValue(defaultSelectedAccount.getLogin_page_url());
+            username_css_selector.setValue(defaultSelectedAccount.getUsername_css_selector());
+            password_css_selector.setValue(defaultSelectedAccount.getPassword_css_selector());
+            btn_cookies_css_selector.setValue(defaultSelectedAccount.getBtn_cookies_css_selector() == null ? "" : defaultSelectedAccount.getBtn_cookies_css_selector());
+            btn_login_css_selector.setValue(defaultSelectedAccount.getBtn_login_css_selector());
 
             // disable everything but the select, username, password
+            account_name.setEnabled(false);
+            comment.setEnabled(false);
+            login_page_url.setEnabled(false);
+            username_css_selector.setEnabled(false);
+            password_css_selector.setEnabled(false);
+            btn_cookies_css_selector.setEnabled(false);
+            btn_login_css_selector.setEnabled(false);
         });
 
         btn_cookies_css_selector.setHelperText("Leave this empty if the website does not ask for cookies.");
@@ -389,7 +411,7 @@ public class AccountsView extends VerticalLayout {
         // open confirm dialog
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setHeader("Confirm Account Deletion");
-        confirmDialog.setText("Are you sure you want to delete your \"" + account.getAccount_name() + "\" account?");
+        confirmDialog.setText("Are you sure you want to delete your \"" + account.getAccount_name() + "\" account from this application?");
         confirmDialog.setConfirmText("Yes, delete");
 
         // delete account on confirm click
@@ -419,38 +441,74 @@ public class AccountsView extends VerticalLayout {
 
     public void resetForm() {
         selectDefaultAccount.clear();
-        account_name.clear();
-        account_name.setInvalid(false);
-        comment.clear();
-        comment.setInvalid(false);
-        username.clear();
-        username.setInvalid(false);
+        List<TextField> dialogTextFields = Arrays.asList(account_name, comment, username, login_page_url,
+                username_css_selector, password_css_selector, btn_cookies_css_selector, btn_login_css_selector);
+
+        for (TextField field : dialogTextFields) {
+            field.clear();
+            field.setInvalid(false);
+            field.setEnabled(true);
+        }
+
+        // this is a PasswordField, not a TextField
         password.clear();
         password.setInvalid(false);
-        login_page_url.clear();
-        login_page_url.setInvalid(false);
-        username_css_selector.clear();
-        username_css_selector.setInvalid(false);
-        password_css_selector.clear();
-        password_css_selector.setInvalid(false);
-        btn_cookies_css_selector.clear();
-        btn_cookies_css_selector.setInvalid(false);
-        btn_login_css_selector.clear();
-        btn_login_css_selector.setInvalid(false);
+        password.setEnabled(true);
     }
 
     public void setupDefaultAccounts() {
-        Account blackboard = new Account();
         blackboard.setAccount_name("Blackboard");
         blackboard.setComment("Deree courses");
-        blackboard.setDate_modified("6 Apr 2023");
+        blackboard.setDate_modified(dateFormat.format(new Date()));
+        blackboard.setLogin_page_url("https://blackboard.acg.edu/");
+        blackboard.setUsername_css_selector("#user_id");
+        blackboard.setPassword_css_selector("#password");
+        blackboard.setBtn_cookies_css_selector("#agree_button");
+        blackboard.setBtn_login_css_selector("#entry-login");
 
-        Account myACG = new Account();
         myACG.setAccount_name("myACG");
         myACG.setComment("Deree account");
-        myACG.setDate_modified("6 Apr 2023");
+        myACG.setDate_modified(dateFormat.format(new Date()));
+        myACG.setLogin_page_url("https://campusweb.acg.edu/ics");
+        myACG.setUsername_css_selector("#userName");
+        myACG.setPassword_css_selector("#password");
+        myACG.setBtn_login_css_selector("#siteNavBar_btnLogin");
 
-        defaultAccounts.add(blackboard);
-        defaultAccounts.add(myACG);
+        netflix.setAccount_name("Netflix");
+        netflix.setComment("Movie streaming");
+        netflix.setDate_modified(dateFormat.format(new Date()));
+        netflix.setLogin_page_url("https://www.netflix.com/gr-en/login?nextpage=https%3A%2F%2Fwww.netflix.com%2Fbrowse");
+        netflix.setUsername_css_selector("#id_userLoginId");
+        netflix.setPassword_css_selector("#id_password");
+        netflix.setBtn_login_css_selector(".btn");
+
+        github.setAccount_name("GitHub");
+        github.setComment("Version control");
+        github.setDate_modified(dateFormat.format(new Date()));
+        github.setLogin_page_url("https://github.com/login");
+        github.setUsername_css_selector("#login_field");
+        github.setPassword_css_selector("#password");
+        github.setBtn_login_css_selector(".btn");
+
+        defaultAccounts = Arrays.asList(blackboard, myACG, netflix, github);
+    }
+
+    public void deleteSelectedAccounts() {
+        // open confirm dialog
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setHeader("Confirm Account Deletion");
+        confirmDialog.setText("Are you sure you want to delete the selected account(s) from this application?");
+        confirmDialog.setConfirmText("Yes, delete");
+
+        // delete account on confirm click
+        confirmDialog.addConfirmListener(click_event -> {
+            for (Account account: selectedAccounts) deleteAccountFromDatabase(account);
+            UI.getCurrent().getPage().reload();
+        });
+
+        confirmDialog.setRejectable(true);
+        confirmDialog.setRejectText("No, cancel");
+        confirmDialog.addRejectListener(click_event -> confirmDialog.close());
+        confirmDialog.open();
     }
 }

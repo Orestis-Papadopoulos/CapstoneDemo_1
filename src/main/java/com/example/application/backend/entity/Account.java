@@ -36,6 +36,22 @@ public class Account {
     private String comment;
     private String date_modified;
 
+    // default constructor
+    public Account() {
+
+    }
+
+    // assign an account to another account
+    public Account(Account account) {
+        this.account_name = account.getAccount_name();
+        this.comment = account.getComment();
+        this.login_page_url = account.getLogin_page_url();
+        this.username_css_selector = account.getUsername_css_selector();
+        this.password_css_selector = account.getPassword_css_selector();
+        this.btn_cookies_css_selector = account.getBtn_cookies_css_selector();
+        this.btn_login_css_selector = account.getBtn_login_css_selector();
+    }
+
 
     // setters and getters
     public Long getAccount_id() {

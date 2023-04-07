@@ -105,7 +105,7 @@ public class MainLayout extends AppLayout {
         langSelect.setItems("English", "Ελληνικά", "Español");
         langSelect.setValue("English");
         langSelect.addToPrefix(new Icon(VaadinIcon.GLOBE));
-        langSelect.setWidth(120, Unit.POINTS);
+        langSelect.setWidth(110, Unit.POINTS);
         header.add(langSelect);
 
         if (user != null && user.getSign_in_session_uuid() != null) {
@@ -151,9 +151,11 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
+        Image logo = new Image("images/app_logo_transparent.png", "app-logo");
+        logo.setHeight(40, Unit.PIXELS);
         H1 appName = new H1("Qard");
         appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-        Header header = new Header(appName);
+        Header header = new Header(logo, appName);
 
         Scroller scroller = new Scroller(createNavigation());
 
