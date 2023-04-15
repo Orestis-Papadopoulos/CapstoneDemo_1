@@ -23,6 +23,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -37,6 +38,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.apache.commons.compress.utils.IOUtils;
 
@@ -104,9 +106,10 @@ public class MainLayout extends AppLayout {
         // language (not functional yet)
         langSelect.setItems("English", "Ελληνικά", "Español");
         langSelect.setValue("English");
+        UI.getCurrent().setLocale(new Locale("en"));
         langSelect.addToPrefix(new Icon(VaadinIcon.GLOBE));
         langSelect.setWidth(110, Unit.POINTS);
-        header.add(langSelect);
+        //header.add(langSelect);
 
         if (user != null && user.getSign_in_session_uuid() != null) {
 
