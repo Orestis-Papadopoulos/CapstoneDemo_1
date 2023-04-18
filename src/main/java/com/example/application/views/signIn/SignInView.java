@@ -85,7 +85,7 @@ public class SignInView extends VerticalLayout {
 
                 System.out.println("I am the timerTask and I have been executed " + iterations + " times.");
 
-                if (iterations < 6) {
+                if (iterations < 147) {
                     user = getUserBySignInSessionUuid(sign_in_session_uuid); // method defined in UserService
 
                     if (user != null) {
@@ -99,7 +99,7 @@ public class SignInView extends VerticalLayout {
                     }
                 }
 
-                if (iterations == 6) {
+                if (iterations == 147) {
                     getUI().ifPresent(ui -> ui.access(() -> {
                         qrCodeLayout.setVisible(false);
                         title.setVisible(false);
@@ -108,7 +108,7 @@ public class SignInView extends VerticalLayout {
                 }
 
                 // this statement must be placed at the end, otherwise even after timer.cancel() code within run() will execute
-                if (++iterations > 12) {
+                if (++iterations > 150) {
                     System.out.println("Sign in session timed out");
                     getUI().ifPresent(ui -> ui.access(() -> {
                         page.setLocation("home");
@@ -117,7 +117,7 @@ public class SignInView extends VerticalLayout {
                 }
             }
         };
-        timer.scheduleAtFixedRate(timerTask, 0, 1000); // period is in milliseconds
+        timer.scheduleAtFixedRate(timerTask, 0, 2000); // period is in milliseconds
     }
 
     public static User getSignedInUser() {

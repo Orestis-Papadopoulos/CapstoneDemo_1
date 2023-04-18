@@ -25,10 +25,11 @@ public class AboutView extends VerticalLayout {
         accordion.setWidth("50%");
 
         // layouts
-        prerequisitesLayout.add(new Span("1. A smartphone with NFC"),
+        prerequisitesLayout.add(new Span("1. An Android smartphone with NFC"),
                                 new Span("2. An Internet connection, both on your PC and smartphone"),
                                 new Span("3. A MIFARE Classic proximity card"),
-                                new Span("4. The authentication app installed on your smartphone"));
+                                new Span("4. The Qard authentication app installed on your smartphone"),
+                                new Span("5. The Firefox web browser"));
 
         courseLayout.add(new Span("ITC4918 Software Development Capstone Project"),
                 new Span("Spring 2023"),
