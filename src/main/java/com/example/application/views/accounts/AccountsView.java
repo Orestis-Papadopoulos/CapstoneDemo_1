@@ -5,6 +5,7 @@ import com.example.application.backend.entity.User;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -119,6 +120,8 @@ public class AccountsView extends VerticalLayout {
         Grid.Column<Account> nameColumn = grid.addColumn(Account::getAccount_name).setHeader(header_name).setSortable(true);
         Grid.Column<Account> commentColumn = grid.addColumn(Account::getComment).setHeader(header_comment).setSortable(true);
         Grid.Column<Account> dateModifiedColumn = grid.addColumn(Account::getDate_modified).setHeader(header_date_modified).setSortable(true);
+        // do the following in case the browser window gets very narrow
+        grid.setMinWidth(700, Unit.PIXELS);
         grid.setWidth("75%");
         grid.setAllRowsVisible(true);
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);

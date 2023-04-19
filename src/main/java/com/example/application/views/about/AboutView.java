@@ -5,6 +5,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.DetailsVariant;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -27,6 +28,9 @@ public class AboutView extends VerticalLayout {
     VerticalLayout developerLayout = new VerticalLayout();
 
     public AboutView() {
+
+        // to set background image
+        addClassName("aboutView");
 
         accordion.setWidth("50%");
         // do the following in case the browser window gets very narrow
@@ -73,6 +77,8 @@ public class AboutView extends VerticalLayout {
         AccordionPanel developerPanel = accordion.add("Developer", developerLayout);
         developerPanel.addThemeVariants(DetailsVariant.FILLED);
 
-        add(accordion);
+        // add two empty images after the accordion so that the background
+        // image is not cut when all accordion tabs are closed
+        add(accordion, new Image("images/empty.png", ""), new Image("images/empty.png", ""));
     }
 }

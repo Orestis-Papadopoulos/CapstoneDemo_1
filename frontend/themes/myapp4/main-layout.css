@@ -126,6 +126,7 @@ h2.wave span {
   }
 }
 
+/* set the delay for each letter */
 h2.wave span:nth-child(2) {
   animation-delay: 0.1s;
 }
@@ -164,4 +165,11 @@ h2.wave span:nth-child(13) {
 }
 h2.wave span:nth-child(14) {
   animation-delay: 1.3s;
+}
+
+/* AboutView background image */
+.aboutView {
+  background-image: url("about_background_image.png");
+  background-position: right top;
+  background-repeat: no-repeat;
 }
