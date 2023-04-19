@@ -17,14 +17,21 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 public class AboutView extends VerticalLayout {
 
     Accordion accordion = new Accordion();
+    VerticalLayout functionalityLayout = new VerticalLayout();
     VerticalLayout prerequisitesLayout = new VerticalLayout();
     VerticalLayout courseLayout = new VerticalLayout();
+    VerticalLayout developerLayout = new VerticalLayout();
 
     public AboutView() {
 
         accordion.setWidth("50%");
 
         // layouts
+        functionalityLayout.add(new Span("Qard offers a unique way of signing in, by using your smartphone and a " +
+                "proximity card. By doing so you can organize your online account credentials and sign in to the " +
+                "account of your choice automatically. Add the account information in the relevant table and enjoy " +
+                "your online experience without typing usernames and passwords."));
+
         prerequisitesLayout.add(new Span("1. An Android smartphone with NFC"),
                                 new Span("2. An Internet connection, both on your PC and smartphone"),
                                 new Span("3. A MIFARE Classic proximity card"),
@@ -43,7 +50,12 @@ public class AboutView extends VerticalLayout {
                         "including domain-specific research, gradual progression, revisiting,\n" +
                         "and evaluation."));
 
-        AccordionPanel functionalityPanel = accordion.add("Functionality", new Span("This is what the app does."));
+        developerLayout.add(new Span("Orestis Papadopoulos 241394, Undergraduate student"),
+                            new Span("DEREE - The American College of Greece"),
+                            new Span("Information Technology (Software Development)"),
+                            new Span("o.papadopoulos@acg.edu"));
+
+        AccordionPanel functionalityPanel = accordion.add("Functionality", functionalityLayout);
         functionalityPanel.addThemeVariants(DetailsVariant.FILLED);
 
         AccordionPanel prerequisitesPanel = accordion.add("Prerequisites", prerequisitesLayout);
@@ -52,7 +64,7 @@ public class AboutView extends VerticalLayout {
         AccordionPanel coursePanel = accordion.add("Course", courseLayout);
         coursePanel.addThemeVariants(DetailsVariant.FILLED);
 
-        AccordionPanel developerPanel = accordion.add("Developer", new Span("About me."));
+        AccordionPanel developerPanel = accordion.add("Developer", developerLayout);
         developerPanel.addThemeVariants(DetailsVariant.FILLED);
 
         add(accordion);
