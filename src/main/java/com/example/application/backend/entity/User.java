@@ -1,9 +1,13 @@
 package com.example.application.backend.entity;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+/**
+ * Defines the User table to be created in the database.
+ * @Id refers to the primary key.
+ * */
 
 @Entity
 public class User {

@@ -40,7 +40,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.annotation.security.PermitAll;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.time.Duration;
@@ -56,7 +55,7 @@ public class AccountsView extends VerticalLayout {
 
     // get the signed-in user from the SignInView to populate the accounts table with their data
     User user = getSignedInUser();
-    // buttons above grid
+    // widgets above grid
     HorizontalLayout btnLayout = new HorizontalLayout();
     Button btn_add_account = new Button(new Icon(VaadinIcon.PLUS));
     Button btn_show_hide = new Button(new Icon(VaadinIcon.EYE));
@@ -65,13 +64,14 @@ public class AccountsView extends VerticalLayout {
     // dialog
     Dialog accountDialog = new Dialog();
     Button btn_save, btn_cancel;
+
     List<Account> accounts = new ArrayList<>();
-    GridListDataView<Account> dataView;
+    GridListDataView<Account> dataView; // for filtering
     Account account = new Account();
     Long account_id;
     Span tip = new Span();
 
-    // form
+    // form (in dialog)
     FormLayout accountFormLayout = new FormLayout();
     Binder<Account> binder = new BeanValidationBinder<>(Account.class);
     Select<String> selectDefaultAccount = new Select<>();
@@ -88,25 +88,29 @@ public class AccountsView extends VerticalLayout {
     DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.DEFAULT);
     Grid<Account> grid = new Grid<>(Account.class, false);
 
-    // grid headers
+    // grid headers (they are customized with CSS)
     Span header_name = new Span("NAME");
     Span header_comment = new Span("COMMENT");
     Span header_date_modified = new Span("DATE MODIFIED");
+
+    // account options
     MenuBar menuBar;
     MenuItem item_sign_in, item_edit, item_delete;
+
+    // default accounts
     List<Account> defaultAccounts = new ArrayList<>();
     Account blackboard = new Account();
     Account myACG = new Account();
     Account netflix = new Account();
     Account github = new Account();
-    // for multi-select deletion
+    // for deletion of multiple accounts
     Set<Account> selectedAccounts;
 
     public AccountsView() {
         binder.bindInstanceFields(this);
         setupDefaultAccounts();
 
-        // set class name to modify only these Spans with css
+        // set class name to modify only these Spans with CSS
         header_name.setClassName("header");
         header_comment.setClassName("header");
         header_date_modified.setClassName("header");
@@ -141,7 +145,8 @@ public class AccountsView extends VerticalLayout {
             item_sign_in.setEnabled(user != null && user.getSign_in_session_uuid() != null);
             item_sign_in.addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.ARROW_RIGHT), new Span("Sign In")));
             item_sign_in.addClickListener(event -> {
-                //redirectDialog.open(); // OPENS AFTER THE AUTO LOGIN HAS TAKEN PLACE, AND PREVENTS NAVIGATING TO THE NEW WINDOW
+                // for better UX, a message saying something similar to "Redirecting...", and a loading icon should
+                // be displayed; I tried to do that but the message is shown after the auto login has taken place
                 try {
                     loginToAccount(selectedAccount);
                 } catch (URISyntaxException | IOException e) {

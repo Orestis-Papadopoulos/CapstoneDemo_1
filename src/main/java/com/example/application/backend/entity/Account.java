@@ -4,7 +4,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
+
+/**
+ * Defines the Account table to be created in the database.
+ * @Id refers to the primary key.
+ * */
 
 @Entity
 public class Account {
@@ -51,7 +55,6 @@ public class Account {
         this.btn_cookies_css_selector = account.getBtn_cookies_css_selector();
         this.btn_login_css_selector = account.getBtn_login_css_selector();
     }
-
 
     // setters and getters
     public Long getAccount_id() {

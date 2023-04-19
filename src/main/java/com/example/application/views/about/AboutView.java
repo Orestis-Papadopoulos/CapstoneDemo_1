@@ -1,15 +1,19 @@
 package com.example.application.views.about;
 
 import com.example.application.views.MainLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.details.DetailsVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+
+/**
+ * A view which aims to inform about the application, the course, and the developer.
+ * */
 
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)
@@ -25,6 +29,8 @@ public class AboutView extends VerticalLayout {
     public AboutView() {
 
         accordion.setWidth("50%");
+        // do the following in case the browser window gets very narrow
+        accordion.setMinWidth(600, Unit.PIXELS);
 
         // layouts
         functionalityLayout.add(new Span("Qard offers a unique way of signing in, by using your smartphone and a " +

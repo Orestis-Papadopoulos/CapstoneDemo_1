@@ -2,11 +2,11 @@ package com.example.application.backend.service;
 
 import com.example.application.backend.entity.User;
 import com.example.application.backend.repository.UserRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+/**
+ * Methods called from the MainLayout, RegisterView, and SignInView classes.
+ * */
 
 @Service
 public class UserService {
@@ -16,20 +16,35 @@ public class UserService {
         this.repo = repo;
     }
 
+    /**
+     * Saves a user to the database.
+     * @param user The user to be stored.
+     * */
     public static void saveUserToDatabase(User user) {
         repo.save(user);
     }
 
+    /**
+     * Returns a signed-in user.
+     * @param sign_in_session_uuid The unique sign in session id corresponding to the user.
+     * */
     public static User getUserBySignInSessionUuid(String sign_in_session_uuid) {
         return repo.searchBySignInSessionUuid(sign_in_session_uuid);
     }
 
-    // this does not work; I added a constructor that takes user_uuid as parameter to create User object based on user_uuid
-    // 'search()' does not look for the primary key (i.e., the user_uuid)
+
+    /**
+     * Returns a user based on their uuid.
+     * @param user_uuid The universally unique identifier of the user to be returned.
+     * */
     public static User getUserByUuid(String user_uuid) {
         return repo.searchByUserUuid(user_uuid);
     }
 
+    /**
+     * Deletes a user from the database.
+     * @param user The user to be deleted.
+     * */
     public static void deleteUserFromDatabase(User user) {
         // called when registration is cancelled
         repo.delete(user);
