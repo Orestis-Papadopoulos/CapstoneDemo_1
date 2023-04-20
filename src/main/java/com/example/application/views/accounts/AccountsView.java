@@ -73,6 +73,8 @@ public class AccountsView extends VerticalLayout {
     Span tip = new Span();
 
     // form (in dialog)
+    // the form fields (that is, the variable names) must have the same names
+    // as the entity columns for data binding to work
     FormLayout accountFormLayout = new FormLayout();
     Binder<Account> binder = new BeanValidationBinder<>(Account.class);
     Select<String> selectDefaultAccount = new Select<>();
