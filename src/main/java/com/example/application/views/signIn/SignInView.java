@@ -1,35 +1,23 @@
 package com.example.application.views.signIn;
 
 import com.example.application.backend.entity.User;
-import com.example.application.views.MainLayout;
-import com.example.application.views.home.HomeView;
 import com.example.application.views.qrcode.QRCode;
-import com.helger.commons.callback.IThrowingRunnable;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static com.example.application.backend.service.UserService.getUserBySignInSessionUuid;
 
@@ -37,9 +25,6 @@ import static com.example.application.backend.service.UserService.getUserBySignI
 @Route(value = "signIn")
 @AnonymousAllowed
 public class SignInView extends VerticalLayout {
-//    VerticalLayout tipsLayout = new VerticalLayout();
-//    HorizontalLayout scanLayout = new HorizontalLayout();
-//    VerticalLayout qrLayout = new VerticalLayout();
     VerticalLayout qrCodeLayout = new VerticalLayout();
     Image qr_code;
     String sign_in_session_uuid = UUID.randomUUID() + "";

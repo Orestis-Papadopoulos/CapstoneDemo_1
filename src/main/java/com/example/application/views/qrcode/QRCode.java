@@ -12,15 +12,20 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
+/**
+ * Used by RegisterView and SignInView to encode the user's uuid and the sign in session uuid
+ * respectively into a QR code the user can scan.
+ * */
+
 public class QRCode {
 
     private static String charset = "UTF-8";
     private static ByteArrayOutputStream imageBuffer = null;
 
-    // for "Dynamic Content" from: https://vaadin.com/docs/latest/advanced/dynamic-content#using-streamresource
+    // see "Dynamic Content" at: https://vaadin.com/docs/latest/advanced/dynamic-content#using-streamresource
     // found the constructor here: https://github.com/vaadin/flow/blob/main/flow-server/src/main/java/com/vaadin/flow/server/StreamResource.java
     // once you type InputStreamFactory in, it prompts for the methods to implement
-    // goto vaadin book p. 91 and adjust the implementation of getStream() to create dynamic image
+    // goto the vaadin book (.pdf) p. 91 and adjust the implementation of getStream() to create dynamic image
     public static StreamResource stringToStreamResource(String qrcode_data) {
         return new StreamResource("", new InputStreamFactory() {
             @Override

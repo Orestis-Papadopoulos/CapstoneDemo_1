@@ -1,8 +1,10 @@
 package com.example.application.views.guide;
 
 import com.example.application.views.MainLayout;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -87,7 +89,11 @@ public class GuideView extends VerticalLayout {
         add(img_blackboard_signed_in, getDividerLayout());
     }
 
-    // an instance of a component cannot be added more than once in the UI; create a new instance every time you want to add
+    /**
+     * Creates a new instance of a vertical layout with a divider image.
+     * An instance of a component cannot be added more than once in the UI.
+     * A new instance of the component must be created every time you want to add it.
+     * */
     public VerticalLayout getDividerLayout() {
         Image img_divider = new Image("images/divider.png", "");
         img_divider.setWidth("10%");

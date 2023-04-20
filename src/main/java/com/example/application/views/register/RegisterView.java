@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -16,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -147,7 +145,7 @@ public class RegisterView extends VerticalLayout {
                     ui.navigate("home"));
         });
 
-        qrCodeLayout.setWidth("25%");
+        qrCodeLayout.setWidth("50%");
         qrCodeLayout.setHorizontalComponentAlignment(Alignment.CENTER, qr_code, tip, btn_cancel_2);
         setHorizontalComponentAlignment(Alignment.CENTER, qrCodeLayout);
         qrCodeLayout.add(qr_code, tip, btn_cancel_2);

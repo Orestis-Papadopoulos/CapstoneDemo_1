@@ -162,7 +162,8 @@ public class AccountsView extends VerticalLayout {
             item_edit.addComponentAsFirst(new HorizontalLayout(new Icon(VaadinIcon.EDIT), new Span("Edit")));
             item_edit.addClickListener(event -> {
                 setForm(selectedAccount);
-                editAccount();
+                accountDialog.setHeaderTitle("Edit Account");
+                accountDialog.open();
             });
 
             item_delete = menuBar.addItem("");
@@ -228,7 +229,6 @@ public class AccountsView extends VerticalLayout {
 
         } else {
             tip.setText("This is a preview. Sign in to add your accounts.");
-
             // add default accounts to grid
             grid.setItems(defaultAccounts);
         }
@@ -237,7 +237,13 @@ public class AccountsView extends VerticalLayout {
         add(btnLayout, grid, tip, accountDialog);
     }
 
-    // for filtering
+    /**
+     * Compares two Strings for grid filtering purposes.
+     * @param value The first string to be compared. This corresponds to an account's name, comment, or modification date.
+     * @param searchTerm The second string to be compared. This corresponds to what the user typed in the search bar.
+     * @return True if the searchTerm contains value.
+     * @source https://vaadin.com/docs/latest/components/grid#filtering
+     * */
     private boolean matches(String value, String searchTerm) {
         return searchTerm == null || searchTerm.isEmpty()
                 || value.toLowerCase().contains(searchTerm.toLowerCase());
@@ -259,6 +265,9 @@ public class AccountsView extends VerticalLayout {
         }
     }
 
+    /**
+     * Adds all the fields to the account dialog's form.
+     * */
     public void setUpAccountDialog() {
 
         selectDefaultAccount.setLabel("You can select from a list of default accounts to save some time from filling the fields.");
@@ -308,12 +317,12 @@ public class AccountsView extends VerticalLayout {
             login_page_url.setValue(defaultSelectedAccount.getLogin_page_url());
             username_css_selector.setValue(defaultSelectedAccount.getUsername_css_selector());
             password_css_selector.setValue(defaultSelectedAccount.getPassword_css_selector());
-            btn_cookies_css_selector.setValue(defaultSelectedAccount.getBtn_cookies_css_selector() == null ? "" : defaultSelectedAccount.getBtn_cookies_css_selector());
+            btn_cookies_css_selector.setValue(
+                    defaultSelectedAccount.getBtn_cookies_css_selector() == null ? "" : defaultSelectedAccount.getBtn_cookies_css_selector());
             btn_login_css_selector.setValue(defaultSelectedAccount.getBtn_login_css_selector());
 
-            // disable everything but the select, username, password
+            // disable everything but the Select, comment, username, and password
             account_name.setEnabled(false);
-            comment.setEnabled(false);
             login_page_url.setEnabled(false);
             username_css_selector.setEnabled(false);
             password_css_selector.setEnabled(false);
@@ -345,6 +354,11 @@ public class AccountsView extends VerticalLayout {
         accountDialog.getFooter().add(btn_cancel, btn_save);
     }
 
+    /**
+     * Called when the "Save" button on the account dialog is clicked.
+     * Saves the account to the database and reloads the page so that
+     * the grid is refreshed.
+     * */
     public void updateAccounts() {
         if (account_id != null) account = getAccountByAccountId(account_id);
         account.setUser_uuid(user.getUser_uuid());
@@ -363,6 +377,9 @@ public class AccountsView extends VerticalLayout {
         }
     }
 
+    /**
+     * Performs automatic login with Selenium to the account the user chose.
+     * */
     private static void loginToAccount(Account selectedAccount) throws URISyntaxException, IOException {
 
         String url = selectedAccount.getLogin_page_url();
@@ -409,11 +426,10 @@ public class AccountsView extends VerticalLayout {
         }
     }
 
-    private void editAccount() {
-        accountDialog.setHeaderTitle("Edit Account");
-        accountDialog.open();
-    }
-
+    /**
+     * Opens a dialog that enables the user to confirm account deletion.
+     * If deletion is confirmed, the selected account is deleted from the database.
+     * */
     private void deleteAccount() {
         account = getAccountByAccountId(account_id);
         // open confirm dialog
@@ -428,12 +444,17 @@ public class AccountsView extends VerticalLayout {
             UI.getCurrent().getPage().reload();
         });
 
+        // cancel button
         confirmDialog.setRejectable(true);
         confirmDialog.setRejectText("No, cancel");
         confirmDialog.addRejectListener(click_event -> confirmDialog.close());
         confirmDialog.open();
     }
 
+    /**
+     * Populates the dialog fields with the information of the passed account.
+     * @param selectedAccount The account whose information is placed on the dialog form.
+     * */
     public void setForm(Account selectedAccount) {
         account_id = selectedAccount.getAccount_id();
         account_name.setValue(selectedAccount.getAccount_name());
@@ -447,23 +468,33 @@ public class AccountsView extends VerticalLayout {
         btn_login_css_selector.setValue(selectedAccount.getBtn_login_css_selector());
     }
 
+    /**
+     * Clears the dialog form fields.
+     * @calledBy btn_add_account's listener
+     * @calledBy selectDefaultAccount's listener
+     * */
     public void resetForm() {
         selectDefaultAccount.clear();
         List<TextField> dialogTextFields = Arrays.asList(account_name, comment, username, login_page_url,
                 username_css_selector, password_css_selector, btn_cookies_css_selector, btn_login_css_selector);
 
+        // reset TextFields
         for (TextField field : dialogTextFields) {
             field.clear();
             field.setInvalid(false);
             field.setEnabled(true);
         }
 
-        // this is a PasswordField, not a TextField
+        // reset PasswordField
         password.clear();
         password.setInvalid(false);
         password.setEnabled(true);
     }
 
+    /**
+     * Sets the information of the default accounts.
+     * This is done to relieve the user from having to add common accounts manually.
+     * */
     public void setupDefaultAccounts() {
         blackboard.setAccount_name("Blackboard");
         blackboard.setComment("Deree courses");
@@ -501,6 +532,10 @@ public class AccountsView extends VerticalLayout {
         defaultAccounts = Arrays.asList(blackboard, myACG, netflix, github);
     }
 
+    /**
+     * Opens a dialog that enables the user to confirm deletion of multiple accounts.
+     * If deletion is confirmed, the selected accounts are deleted from the database.
+     * */
     public void deleteSelectedAccounts() {
         // open confirm dialog
         ConfirmDialog confirmDialog = new ConfirmDialog();
