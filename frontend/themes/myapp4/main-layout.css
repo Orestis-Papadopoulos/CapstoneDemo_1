@@ -57,20 +57,27 @@ vaadin-scroller[slot="drawer"][overflow~="bottom"] {
 }
 
 /* Custom CSS Starts Here */
-/* use setClassName() in the image you want the property to apply (not all images must be rounded) */
+
+/* use setClassName() or addClassName() on the component you want
+   the property to apply to (e.g., not all images must have rounded corners) */
 
 /* round the corners */
 img.user-photo {
   border-radius: 5%;
 }
 
-/* modify the grid's header font */
+/* image at About >> Name and Logo */
+img.loomCards {
+  border-radius: 5%;
+}
+
+/* modify the grid's column headers' font */
 span.header {
   font-weight: bold;
   color: darkslategrey;
 }
 
-/* text under images at Home page (reveal animation): https://codepen.io/michielvandewalle/pen/KaGoyq */
+/* reveal animation for text under images at Home page (source: https://codepen.io/michielvandewalle/pen/KaGoyq) */
 span.card-span {
   text-align: center;
   display: block;
@@ -95,7 +102,9 @@ span.desktop-span {
     transform: translate(0,0);
   }
 }
+/* end of reveal animation */
 
+/* make text under images at Home page bold on hover */
 .card-img:hover + .card-span {
   font-weight: bold;
 }
@@ -106,7 +115,7 @@ span.desktop-span {
   font-weight: bold;
 }
 
-/* title wave: https://codepen.io/codegrind6/pen/eYzQmqN */
+/* make Home page title wavy (source: https://codepen.io/codegrind6/pen/eYzQmqN) */
 h2.wave span {
   position: relative;
   top: 20px;
@@ -166,8 +175,12 @@ h2.wave span:nth-child(13) {
 h2.wave span:nth-child(14) {
   animation-delay: 1.3s;
 }
+/* end of wave animation */
 
 /* AboutView background image */
+/* when the browser window is narrow, the image appears in front of the accordion;
+   I tried setting the opacity of the accordion to 1 (thinking it might have been transparent by default),
+   but it did not make any difference */
 .aboutView {
   background-image: url("about_background_image.png");
   background-position: right top;

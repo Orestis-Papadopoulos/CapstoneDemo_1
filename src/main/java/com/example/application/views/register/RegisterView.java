@@ -204,6 +204,9 @@ public class RegisterView extends VerticalLayout {
                     // if the proximity card id is null, then the user did not scan the QR code
                     if (user.getProximity_card_id() != null && !user.getProximity_card_id().equals("")) {
                         System.out.println("A user tried to register");
+
+                        // see "Asynchronous Updates" at: https://vaadin.com/docs/v14/flow/advanced/tutorial-push-access
+                        // on how to navigate in the web app from a background thread
                         getUI().ifPresent(ui -> ui.access(() -> {
                             page.setLocation("home");
                         }));

@@ -27,7 +27,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
@@ -42,7 +41,6 @@ import org.apache.commons.compress.utils.IOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 
 import static com.example.application.backend.service.UserService.saveUserToDatabase;
 import static com.example.application.views.signIn.SignInView.getSignedInUser;
@@ -52,8 +50,8 @@ import static com.example.application.views.signIn.SignInView.getSignedInUser;
  */
 public class MainLayout extends AppLayout {
 
-    // I have to get the user from the SignInView to add logout btn if they are signed-in
     private static H2 viewTitle;
+    // get the signed-in user from the SignInView to add the logout button if they are signed-in
     User user;
     Dialog profileDialog = new Dialog();
     TextField first_name = new TextField("First name");
@@ -64,9 +62,6 @@ public class MainLayout extends AppLayout {
     Upload upload = new Upload(buffer);
     StreamResource streamResource;
     Binder<User> binder = new BeanValidationBinder<>(User.class);
-
-    // localization (not functional yet)
-    Select<String> langSelect = new Select<>();
 
     public MainLayout() throws IOException {
         setPrimarySection(Section.DRAWER);
@@ -99,14 +94,6 @@ public class MainLayout extends AppLayout {
                     ui.navigate("register"));
         });
 
-        // language (not functional yet)
-        langSelect.setItems("English", "Ελληνικά", "Español");
-        langSelect.setValue("English");
-        UI.getCurrent().setLocale(new Locale("en"));
-        langSelect.addToPrefix(new Icon(VaadinIcon.GLOBE));
-        langSelect.setWidth(110, Unit.POINTS);
-        //header.add(langSelect);
-
         if (user != null && user.getSign_in_session_uuid() != null) {
 
             Avatar avatar = new Avatar();
@@ -131,7 +118,6 @@ public class MainLayout extends AppLayout {
             SubMenu subMenu = menuItem.getSubMenu();
             setUpProfileDialog();
             subMenu.addItem(new HorizontalLayout(new Icon(VaadinIcon.USER_CARD), new Span("Profile")), listener -> profileDialog.open());
-            //subMenu.addItem("Settings");
             subMenu.addItem(new HorizontalLayout(new Icon(VaadinIcon.SIGN_OUT), new Span("Logout")), listener -> logout());
 
             // add the account_menu on the header, not the avatar
@@ -149,31 +135,38 @@ public class MainLayout extends AppLayout {
         addToNavbar(header);
     }
 
+    /**
+     * Sets up the drawer (left side of layout) with the logo and app name.
+     * */
     private void addDrawerContent() {
         Image logo = new Image("images/app_logo_transparent.png", "app-logo");
         logo.setHeight(40, Unit.PIXELS);
         H1 appName = new H1("Qard");
         appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+
         Header header = new Header(logo, appName);
-
         Scroller scroller = new Scroller(createNavigation());
-
         addToDrawer(header, scroller, createFooter());
     }
 
+    /**
+     * Adds the navigation links to the drawer.
+     * */
     private AppNav createNavigation() {
         // AppNav is not yet an official component.
         // For documentation, visit https://github.com/vaadin/vcf-nav#readme
-        AppNav nav = new AppNav();
 
+        AppNav nav = new AppNav();
         nav.addItem(new AppNavItem("Home", HomeView.class, new Icon(VaadinIcon.HOME)));
         nav.addItem(new AppNavItem("Accounts", AccountsView.class, new Icon(VaadinIcon.GRID_BEVEL)));
         nav.addItem(new AppNavItem("Guide", GuideView.class, new Icon(VaadinIcon.BOOK)));
         nav.addItem(new AppNavItem("About", AboutView.class, new Icon(VaadinIcon.INFO_CIRCLE_O)));
-
         return nav;
     }
 
+    /**
+     * Adds the footer with copyrights info to the drawer.
+     * */
     private Footer createFooter() {
         Footer layout = new Footer();
         Image img_copyright = new Image("images/copyright.png", "");
@@ -193,12 +186,16 @@ public class MainLayout extends AppLayout {
         return title == null ? "" : title.value();
     }
 
+    /**
+     * Creates the profile dialog of the user. It has their first name, last name, and profile photo (if any).
+     * The user can view and edit their profile info with this dialog.
+     * */
     public void setUpProfileDialog() {
         // for data binding
         binder.bindInstanceFields(this);
 
         profileDialog.setHeaderTitle("Profile Info");
-        VerticalLayout dialogProfileLayout = new VerticalLayout();
+        VerticalLayout profileDialogLayout = new VerticalLayout();
         FormLayout profileFormlayout = new FormLayout();
 
         first_name.setValue(user.getFirst_name());
@@ -208,6 +205,7 @@ public class MainLayout extends AppLayout {
         profileFormlayout.setColspan(last_name, 2);
         profileFormlayout.add(first_name, last_name);
 
+        // for uploading/editing a photo
         upload.setDropLabel(new Span("Drop photo here"));
         upload.addSucceededListener(event -> {
             String fileName = event.getFileName();
@@ -220,7 +218,6 @@ public class MainLayout extends AppLayout {
             }
         });
 
-        // start of Upload component
         Button btn_upload = new Button("Upload photo");
         upload.setUploadButton(btn_upload);
 
@@ -232,7 +229,9 @@ public class MainLayout extends AppLayout {
                     btn_upload.setEnabled(!maxFilesReached);
                 }).addEventData("event.detail.value");
 
-        dialogProfileLayout.add(profileFormlayout, upload);
+        profileDialogLayout.add(profileFormlayout, upload);
+
+        // put photo in avatar, if one is uploaded, otherwise put user's initials to avatar
         if (photo != null) {
             MenuBar photo_menu = new MenuBar();
             MenuItem edit_photo = photo_menu.addItem("Edit photo");
@@ -246,12 +245,13 @@ public class MainLayout extends AppLayout {
 
             upload.setUploadButton(photo_menu);
             image.setHeight("250px");
-            image.setClassName("user-photo"); // to apply css property only to this image
-            dialogProfileLayout.add(image);
-        }
-        // end of Upload component
-        profileDialog.add(dialogProfileLayout);
+            image.setClassName("user-photo"); // to apply CSS property only to this image
+            profileDialogLayout.add(image);
+        } // end of Upload component
 
+        profileDialog.add(profileDialogLayout);
+
+        // for saving changes to profile
         Button btn_save = new Button("Save");
         btn_save.addClickListener(click_event -> {
             if (binder.validate().isOk()) {
@@ -260,7 +260,6 @@ public class MainLayout extends AppLayout {
                     saveUserToDatabase(user);
                     profileDialog.close();
                     UI.getCurrent().getPage().reload();
-
                 } catch (ValidationException e) {
                     throw new RuntimeException(e);
                 }
@@ -272,11 +271,13 @@ public class MainLayout extends AppLayout {
         profileDialog.getFooter().add(btn_cancel, btn_save);
     }
 
+    /**
+     * Logs out the user by setting their sign in session uuid to null.
+     * Only signed-in users have a non-null sign in session uuid.
+     * */
     public void logout() {
-        // set the sign_in_session_uuid null; only signed-in users should have non-null sign in session uuid
         user.setSign_in_session_uuid(null);
         saveUserToDatabase(user); // you must save to update the sign in session uuid in database
-        //user = new User(); // do I need this? on logout the sign in id is set to null, but the user is still available
         UI.getCurrent().getPage().reload();
     }
 }
