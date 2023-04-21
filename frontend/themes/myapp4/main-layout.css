@@ -81,7 +81,7 @@ span.header {
 span.card-span {
   text-align: center;
   display: block;
-  animation: reveal 3s cubic-bezier(0.77, 0, 0.175, 1) 0s;
+  animation: reveal 2s cubic-bezier(0.77, 0, 0.175, 1) 0s;
 }
 span.phone-span {
   text-align: center;
@@ -91,7 +91,7 @@ span.phone-span {
 span.desktop-span {
   text-align: center;
   display: block;
-  animation: reveal 3s cubic-bezier(0.77, 0, 0.175, 1) 0s;
+  animation: reveal 4s cubic-bezier(0.77, 0, 0.175, 1) 0s;
 }
 
 @keyframes reveal {

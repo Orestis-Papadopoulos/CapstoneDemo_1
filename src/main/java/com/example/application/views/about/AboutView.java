@@ -26,6 +26,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 public class AboutView extends VerticalLayout {
 
     Accordion accordion = new Accordion();
+    VerticalLayout acknowledgementsLayout = new VerticalLayout();
     VerticalLayout functionalityLayout = new VerticalLayout();
     VerticalLayout prerequisitesLayout = new VerticalLayout();
     VerticalLayout nameAndLogoLayout = new VerticalLayout();
@@ -40,6 +41,15 @@ public class AboutView extends VerticalLayout {
         accordion.setWidth("50%");
         // do the following in case the browser window gets very narrow
         accordion.setMinWidth(600, Unit.PIXELS);
+
+        // acknowledgements
+        acknowledgementsLayout.add(new Span("I would like to thank the following professors for their integral " +
+                        "contributions to my studies and work on this project:"),
+                                   new Span("Ilias Hotzoglou"),
+                                   new Span("Evangelia Kyriakidou"),
+                                   new Span("George Vardoulias, Ph.D."),
+                                   new Span("Evgenia Vagianou"),
+                                   new Span("Ioannis Christou, Ph.D."));
 
         // functionality
         Span about_functionality = new Span("Qard offers a unique way of signing in, by using your smartphone and a " +
@@ -124,6 +134,9 @@ public class AboutView extends VerticalLayout {
                             new Span("o.papadopoulos@acg.edu"));
 
         // set accordion panel names
+        AccordionPanel acknowledgementsPanel = accordion.add("Acknowledgements", acknowledgementsLayout);
+        acknowledgementsPanel.addThemeVariants(DetailsVariant.FILLED);
+
         AccordionPanel functionalityPanel = accordion.add("Functionality", functionalityLayout);
         functionalityPanel.addThemeVariants(DetailsVariant.FILLED);
 

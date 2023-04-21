@@ -346,6 +346,7 @@ public class AccountsView extends VerticalLayout {
         dialogLayout.add(accountFormLayout);
         accountDialog.add(dialogLayout);
         accountDialog.setWidth("50%");
+        accountDialog.setMinWidth(500, Unit.PIXELS); // do this in case the browser window gets narrow
 
         btn_save = new Button("Save", click_event -> updateAccounts());
         btn_cancel = new Button("Cancel", click_event -> {
