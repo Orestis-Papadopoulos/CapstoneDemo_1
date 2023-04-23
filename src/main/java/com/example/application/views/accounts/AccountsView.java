@@ -219,6 +219,7 @@ public class AccountsView extends VerticalLayout {
             // is populated with accounts even when a user is not signed in
             searchField.addValueChangeListener(e -> dataView.refreshAll());
             searchField.setEnabled(true);
+            searchField.setTooltipText("Filter accounts by any column");
 
             dataView.addFilter(account -> {
                 String searchTerm = searchField.getValue().trim();
@@ -273,6 +274,7 @@ public class AccountsView extends VerticalLayout {
     public void setUpAccountDialog() {
 
         selectDefaultAccount.setLabel("You can select from a list of default accounts to save some time from filling the fields.");
+        selectDefaultAccount.setTooltipText("See default accounts");
         selectDefaultAccount.setEmptySelectionAllowed(true);
         selectDefaultAccount.setEmptySelectionCaption("No account selected");
 

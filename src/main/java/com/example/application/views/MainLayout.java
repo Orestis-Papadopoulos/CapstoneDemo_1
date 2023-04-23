@@ -83,12 +83,14 @@ public class MainLayout extends AppLayout {
         user = getSignedInUser();
 
         Button btn_signIn = new Button("Sign In");
+        btn_signIn.setTooltipText("Sign in to your Qard account");
         btn_signIn.addClickListener(e -> {
             btn_signIn.getUI().ifPresent(ui ->
                     ui.navigate("signIn"));
         });
 
         Button btn_register = new Button("Register");
+        btn_register.setTooltipText("Create a Qard account");
         btn_register.addClickListener(e -> {
             btn_register.getUI().ifPresent(ui ->
                     ui.navigate("register"));

@@ -15,9 +15,9 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * A view which aims to inform about:
- * >> the application (functionality, prerequisites, name, and logo),
- * >> the course,
- * >> and the developer.
+ * the application (functionality, prerequisites, name, and logo),
+ * the course,
+ * and the developer.
  * */
 
 @PageTitle("About")

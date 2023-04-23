@@ -87,6 +87,7 @@ public class RegisterView extends VerticalLayout {
                                     "image/png", ".png");
         upload.setDropLabel(new Span("Drop photo here"));
         Button btn_upload = new Button("Upload Photo");
+        btn_upload.setTooltipText("Browse your computer");
         upload.setUploadButton(btn_upload);
 
         // if the upload button is modified, then it is not disabled when 1 file (max allowed) is uploaded
@@ -115,7 +116,9 @@ public class RegisterView extends VerticalLayout {
         txtfieldsLayout.add(first_name, last_name);
 
         Button btn_ok = new Button("OK");
+        btn_ok.setTooltipText("Proceed to QR code");
         Button btn_cancel_form = new Button("Cancel");
+        btn_cancel_form.setTooltipText("Go back to Home");
         btn_cancel_form.addThemeVariants(ButtonVariant.LUMO_ERROR);
         buttonsLayout = new HorizontalLayout(btn_ok, btn_cancel_form);
 
@@ -147,6 +150,7 @@ public class RegisterView extends VerticalLayout {
         Span scan_tip = new Span("Open your mobile app and scan me to complete the registration.");
 
         Button btn_cancel_scan = new Button("Cancel");
+        btn_cancel_scan.setTooltipText("Go back to Home");
         btn_cancel_scan.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         btn_cancel_scan.addClickListener(click_event -> {
