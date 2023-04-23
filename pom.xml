@@ -14,6 +14,12 @@
         <vaadin.version>23.3.6</vaadin.version>
         <!-- this parameter is needed as spring-boot bom overwrites it -->
         <selenium.version>4.5.3</selenium.version>
+
+
+        <!-- to avoid error during the build of .jar -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
     </properties>
 
     <parent>
@@ -90,6 +96,13 @@
                 <groupId>org.apache.httpcomponents.core5</groupId>
                 <artifactId>httpcore5</artifactId>
                 <version>5.2.1</version>
+            </dependency>
+
+            <!-- for building .jar executable -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-tomcat</artifactId>
+                <scope>provided</scope>
             </dependency>
 
         </dependencies>
